@@ -1,5 +1,6 @@
-#include "../src/engine_v1.h"
+#include "../src/engine_v3.h"
 #include "../src/engine_v2.h"
+#include "../src/engine_v1.h"
 #include <iostream>
 #include <vector>
 
@@ -29,14 +30,14 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 1.0;
-const double TIME_TO_THINK_BLACK = 1.0;
+const double TIME_TO_THINK_WHITE = 0.2;
+const double TIME_TO_THINK_BLACK = 0.2;
 
 int main(int argc, char* argv[]) {
     Board b;
     // b.reset(); // Constructor calls reset
     
-    EngineV1 engine_white;
+    EngineV3 engine_white;
     EngineV2 engine_black;
     
     std::cout << "Starting match with time limits: White=" << TIME_TO_THINK_WHITE << "s, Black=" << TIME_TO_THINK_BLACK << "s" << std::endl;

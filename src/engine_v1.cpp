@@ -5,6 +5,7 @@
 
 using namespace std::chrono;
 
+// VERSION 1 Engine does basic minimax search with piece values evaluation
 EngineV1::EngineV1() : nodes_visited(0), last_depth(0) {}
 
 long long EngineV1::get_nodes_visited() const { return nodes_visited; }

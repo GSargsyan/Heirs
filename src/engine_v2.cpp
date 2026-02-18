@@ -6,6 +6,7 @@
 
 using namespace std::chrono;
 
+// VERSION 2 Engine is V1 + alpha-beta pruning + basic center control and mobility 
 EngineV2::EngineV2() : nodes_visited(0), last_depth(0) {}
 
 long long EngineV2::get_nodes_visited() const { return nodes_visited; }

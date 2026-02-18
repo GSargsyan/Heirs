@@ -97,7 +97,10 @@ void Board::reset() {
 }
 
 void Board::print() const {
-    char piece_chars[] = {'.', 'B', 'P', 'X', 'Y', 'G', 'T', 'S', 'N'}; 
+    // Unicode chess pieces and shapes
+    // Index: 0=NO, 1=BABY, 2=PRINCE, 3=PRINCESS, 4=PONY, 5=GUARD, 6=TUTOR, 7=SCOUT, 8=SIBLING
+    const char* white_pieces[] = {".", "●", "♚", "♛", "♞", "♜", "♝", "▲", "◆"};
+    const char* black_pieces[] = {".", "○", "♔", "♕", "♘", "♖", "♗", "△", "◇"};
     
     std::cout << "    a b c d e f g h j k m n\n";
     std::cout << "  -------------------------\n";
@@ -108,14 +111,15 @@ void Board::print() const {
             int sq = row * 12 + col;
             PieceType p = pieces[sq];
             Color c = colors[sq];
-            char ch = '.';
+            const char* s = ".";
             if (p != NO_PIECE) {
-                ch = piece_chars[p];
-                if (c == BLACK) {
-                    ch = tolower(ch);
+                if (c == WHITE) {
+                    s = white_pieces[p];
+                } else {
+                    s = black_pieces[p];
                 }
             }
-            std::cout << " " << ch;
+            std::cout << " " << s;
         }
         std::cout << " |" << std::setw(2) << (row + 1) << "\n";
     }
@@ -458,7 +462,8 @@ bool Board::is_fifty_moves() const {
 }
 
 bool Board::is_draw() const {
-    if (is_fifty_moves()) return true;
+    // TODO: Implement 50 move rule. For now, it is disabled.
+    // if (is_fifty_moves()) return true;
     if (is_repetition()) return true;
     return false;
 }
