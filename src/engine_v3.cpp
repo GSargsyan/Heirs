@@ -6,7 +6,7 @@
 
 using namespace std::chrono;
 
-// VERSION 3 Engine is V2 + transposition table (with quiescence search in it) + different piece approximation costs
+// VERSION 3 Engine is V2 + transposition table (with move ordering in it) + different piece approximation costs
 EngineV3::EngineV3() : nodes_visited(0), last_depth(0) {
     tt.resize(TT_SIZE);
     clear_tt();

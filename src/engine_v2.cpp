@@ -77,17 +77,6 @@ int EngineV2::evaluate(const Board& b) {
     
     int eval = material_score + positional_score;
     
-    // Mobility (Expensive? generating moves is somewhat costly)
-    // Let's try adding it.
-    // We need to generate moves for the side to move? 
-    // Usually mobility is calc for both sides.
-    // But generate_moves() only does side_to_move.
-    // If we want mobility for both, we need to hack it or skip it for now to avoid being too slow.
-    // "heuristics... not slow". 
-    // Let's stick to Positional + Material for now, iterating mobility might double the cost.
-    // But we can approximate mobility:
-    // e.g. Scouts have high mobility in open.
-    
     return eval;
 }
 
