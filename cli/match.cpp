@@ -1,3 +1,5 @@
+#include "../src/engine_v7.h"
+#include "../src/engine_v6.h"
 #include "../src/engine_v5.h"
 #include "../src/engine_v4.h"
 #include "../src/engine_v3.h"
@@ -5,6 +7,7 @@
 #include "../src/engine_v1.h"
 #include <iostream>
 #include <vector>
+#include <windows.h>
 
 std::string move_to_string(const Move& m) {
     if (m.from == 0 && m.to == 0) return "NullMove";
@@ -32,21 +35,24 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 10;
+const double TIME_TO_THINK_WHITE = 1;
 const double TIME_TO_THINK_BLACK = 1;
 
 int main(int argc, char* argv[]) {
+    // Set console code page to UTF-8
+    SetConsoleOutputCP(CP_UTF8);
+
     Board b;
     // b.reset(); // Constructor calls reset
     
-    EngineV5 engine_white;
-    EngineV1 engine_black;
+    EngineV7 engine_white;
+    EngineV4 engine_black;
     
     std::cout << "Starting match with time limits: White=" << TIME_TO_THINK_WHITE << "s, Black=" << TIME_TO_THINK_BLACK << "s" << std::endl;
     b.print();
     
     int moves = 0;
-    while (!b.is_game_over() && moves < 600) { // Limit game length to avoid infinite
+    while (!b.is_game_over() && moves < 60) { // Limit game length to avoid infinite
         if (b.is_draw()) {
             std::cout << "Draw detected (Repetition or 50-move rule)." << std::endl;
             return 0;
@@ -58,7 +64,7 @@ int main(int argc, char* argv[]) {
         Move m;
         if (side == WHITE) {
             m = engine_white.search(b, TIME_TO_THINK_WHITE);
-            std::cout << "  Stats: Depth=" << engine_white.get_max_depth() 
+            std::cout << "  V6 Stats: Depth=" << engine_white.get_max_depth() 
                       << ", Nodes=" << engine_white.get_nodes_visited() << std::endl;
         } else {
             m = engine_black.search(b, TIME_TO_THINK_BLACK);

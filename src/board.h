@@ -61,6 +61,7 @@ public:
     // Game state
     Color side_to_move() const { return turn; }
     bool is_game_over() const;
+    int get_half_move_clock() const { return half_move_clock; }
     
     // Draw detection
     bool is_repetition() const;

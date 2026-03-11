@@ -1,0 +1,569 @@
+Tournament settings:
+Games per pair: 10
+Max moves per game: 30 (60 ply)
+Time per move: 0.1s
+
+========== EngineV6 vs EngineV1 ==========
+Game 1: V6 as White | WON  | Diff: 2310 | Score: 15520 to 13210 | Reason: Move Limit Reached
+Game 2: V6 as Black | WON  | Diff: 1780 | Score: 15520 to 13740 | Reason: Move Limit Reached
+Game 3: V6 as White | WON  | Diff: 1305 | Score: 15320 to 14015 | Reason: Move Limit Reached
+Game 4: V6 as Black | WON  | Diff: 1560 | Score: 15620 to 14060 | Reason: Move Limit Reached
+Game 5: V6 as White | WON  | Diff: 3235 | Score: 15520 to 12285 | Reason: Move Limit Reached
+Game 6: V6 as Black | WON  | Diff: 2160 | Score: 15020 to 12860 | Reason: Move Limit Reached
+Game 7: V6 as White | WON  | Diff: 2535 | Score: 15520 to 12985 | Reason: Move Limit Reached
+Game 8: V6 as Black | WON  | Diff: 2840 | Score: 15420 to 12580 | Reason: Move Limit Reached
+Game 9: V6 as White | WON  | Diff: 2410 | Score: 15520 to 13110 | Reason: Move Limit Reached
+Game 10: V6 as Black | WON  | Diff: 1610 | Score: 14920 to 13310 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV1 ---
+EngineV6 Wins: 10, Losses: 0, Draws: 0 | Average Diff: 2174.5
+
+========== EngineV6 vs EngineV2 ==========
+Game 1: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+Game 3: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+Game 5: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+Game 7: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV2 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -2017.5
+
+
+
+======================================================
+                NEW TOURNAMENT RUN
+======================================================
+
+Tournament settings:
+Games per pair: 10
+Max moves per game: 30 (60 ply)
+Time per move: 0.1s
+
+========== EngineV6 vs EngineV1 ==========
+Game 1: V6 as White | WON  | Diff: 3305 | Score: 15520 to 12215 | Reason: Move Limit Reached
+Game 2: V6 as Black | WON  | Diff: 2455 | Score: 15620 to 13165 | Reason: Move Limit Reached
+Game 3: V6 as White | WON  | Diff: 2310 | Score: 15520 to 13210 | Reason: Move Limit Reached
+Game 4: V6 as Black | WON  | Diff: 1655 | Score: 15420 to 13765 | Reason: Move Limit Reached
+Game 5: V6 as White | WON  | Diff: 1830 | Score: 15320 to 13490 | Reason: Move Limit Reached
+Game 6: V6 as Black | WON  | Diff: 10840 | Score: 15520 to 4680 | Reason: Prince Captured
+Game 7: V6 as White | WON  | Diff: 480 | Score: 15520 to 15040 | Reason: Move Limit Reached
+Game 8: V6 as Black | WON  | Diff: 1935 | Score: 15520 to 13585 | Reason: Move Limit Reached
+Game 9: V6 as White | WON  | Diff: 2285 | Score: 15420 to 13135 | Reason: Move Limit Reached
+Game 10: V6 as Black | WON  | Diff: 2705 | Score: 15420 to 12715 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV1 ---
+EngineV6 Wins: 10, Losses: 0, Draws: 0 | Average Diff: 2980
+
+========== EngineV6 vs EngineV2 ==========
+Game 1: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+Game 3: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+Game 5: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+Game 7: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -2755 | Score: 12540 to 15295 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV2 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -2017.5
+
+========== EngineV6 vs EngineV3 ==========
+Game 1: V6 as White | LOST | Diff: -1280 | Score: 14140 to 15420 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -11455 | Score: 4165 to 15620 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -2080 | Score: 13440 to 15520 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -11550 | Score: 4070 to 15620 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -1325 | Score: 14195 to 15520 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -11375 | Score: 4145 to 15520 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -10400 | Score: 4620 to 15020 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -1930 | Score: 13690 to 15620 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -2055 | Score: 13465 to 15520 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -11355 | Score: 4065 to 15420 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV3 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -6480.5
+
+========== EngineV6 vs EngineV4 ==========
+Game 1: V6 as White | LOST | Diff: -12305 | Score: 2715 to 15020 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -10300 | Score: 5220 to 15520 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -1375 | Score: 14245 to 15620 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -10300 | Score: 5220 to 15520 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -1375 | Score: 14245 to 15620 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -12055 | Score: 3565 to 15620 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -1375 | Score: 14245 to 15620 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -1555 | Score: 13965 to 15520 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -1375 | Score: 14245 to 15620 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -10300 | Score: 5220 to 15520 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV4 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -6231.5
+
+
+
+======================================================
+                NEW TOURNAMENT RUN
+======================================================
+
+Tournament settings:
+Games per pair: 10
+Max moves per game: 30 (60 ply)
+Time per move: 0.1s
+
+========== EngineV6 vs EngineV1 ==========
+Game 1: V6 as White | WON  | Diff: 2160 | Score: 15620 to 13460 | Reason: Move Limit Reached
+Game 2: V6 as Black | WON  | Diff: 2760 | Score: 15520 to 12760 | Reason: Move Limit Reached
+Game 3: V6 as White | WON  | Diff: 1700 | Score: 15620 to 13920 | Reason: Move Limit Reached
+Game 4: V6 as Black | WON  | Diff: 3250 | Score: 15520 to 12270 | Reason: Move Limit Reached
+Game 5: V6 as White | WON  | Diff: 2930 | Score: 15620 to 12690 | Reason: Move Limit Reached
+Game 6: V6 as Black | WON  | Diff: 1880 | Score: 15020 to 13140 | Reason: Move Limit Reached
+Game 7: V6 as White | WON  | Diff: 2160 | Score: 15020 to 12860 | Reason: Move Limit Reached
+Game 8: V6 as Black | WON  | Diff: 2025 | Score: 15520 to 13495 | Reason: Move Limit Reached
+Game 9: V6 as White | WON  | Diff: 1280 | Score: 15340 to 14060 | Reason: Move Limit Reached
+Game 10: V6 as Black | WON  | Diff: 2305 | Score: 15620 to 13315 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV1 ---
+EngineV6 Wins: 10, Losses: 0, Draws: 0 | Average Diff: 2245
+
+========== EngineV6 vs EngineV2 ==========
+Game 1: V6 as White | LOST | Diff: -755 | Score: 13965 to 14720 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -11705 | Score: 3715 to 15420 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -755 | Score: 13965 to 14720 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -11705 | Score: 3715 to 15420 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -755 | Score: 13965 to 14720 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -11705 | Score: 3715 to 15420 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -755 | Score: 13965 to 14720 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -11705 | Score: 3715 to 15420 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -755 | Score: 13965 to 14720 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -11705 | Score: 3715 to 15420 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV2 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -6230
+
+========== EngineV6 vs EngineV3 ==========
+Game 1: V6 as White | LOST | Diff: -10725 | Score: 4695 to 15420 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -10200 | Score: 5420 to 15620 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -11000 | Score: 4420 to 15420 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -1705 | Score: 13815 to 15520 | Reason: Move Limit Reached
+Game 5: V6 as White | LOST | Diff: -11455 | Score: 3640 to 15095 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -11280 | Score: 4140 to 15420 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -3680 | Score: 11740 to 15420 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -11705 | Score: 3815 to 15520 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -2885 | Score: 12635 to 15520 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -2005 | Score: 13615 to 15620 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV3 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -7664
+
+========== EngineV6 vs EngineV4 ==========
+Game 1: V6 as White | LOST | Diff: -10000 | Score: 5520 to 15520 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -800 | Score: 14820 to 15620 | Reason: Move Limit Reached
+Game 3: V6 as White | LOST | Diff: -10100 | Score: 5520 to 15620 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -800 | Score: 14820 to 15620 | Reason: Move Limit Reached
+Game 5: V6 as White | LOST | Diff: -10100 | Score: 5520 to 15620 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -1955 | Score: 13465 to 15420 | Reason: Move Limit Reached
+Game 7: V6 as White | LOST | Diff: -10000 | Score: 5520 to 15520 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -800 | Score: 14820 to 15620 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -10100 | Score: 5520 to 15620 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -800 | Score: 14820 to 15620 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV4 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -5545.5
+
+
+
+======================================================
+                NEW TOURNAMENT RUN
+======================================================
+
+Tournament settings:
+Games per pair: 10
+Max moves per game: 30 (60 ply)
+Time per move: 0.1s
+
+========== EngineV6 vs EngineV1 ==========
+Game 1: V6 as White | WON  | Diff: 2610 | Score: 15620 to 13010 | Reason: Move Limit Reached
+Game 2: V6 as Black | WON  | Diff: 2660 | Score: 15520 to 12860 | Reason: Move Limit Reached
+Game 3: V6 as White | WON  | Diff: 2715 | Score: 15420 to 12705 | Reason: Move Limit Reached
+Game 4: V6 as Black | WON  | Diff: 1610 | Score: 15420 to 13810 | Reason: Move Limit Reached
+Game 5: V6 as White | WON  | Diff: 2860 | Score: 15620 to 12760 | Reason: Move Limit Reached
+Game 6: V6 as Black | WON  | Diff: 2130 | Score: 15420 to 13290 | Reason: Move Limit Reached
+Game 7: V6 as White | WON  | Diff: 2635 | Score: 15520 to 12885 | Reason: Move Limit Reached
+Game 8: V6 as Black | WON  | Diff: 2400 | Score: 15620 to 13220 | Reason: Move Limit Reached
+Game 9: V6 as White | WON  | Diff: 900 | Score: 14820 to 13920 | Reason: Move Limit Reached
+Game 10: V6 as Black | WON  | Diff: 1980 | Score: 15520 to 13540 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV1 ---
+EngineV6 Wins: 10, Losses: 0, Draws: 0 | Average Diff: 2250
+
+========== EngineV6 vs EngineV2 ==========
+Game 1: V6 as White | LOST | Diff: -10980 | Score: 4540 to 15520 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -2305 | Score: 12515 to 14820 | Reason: Move Limit Reached
+Game 3: V6 as White | LOST | Diff: -780 | Score: 14740 to 15520 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -2305 | Score: 12515 to 14820 | Reason: Move Limit Reached
+Game 5: V6 as White | LOST | Diff: -10980 | Score: 4540 to 15520 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -2305 | Score: 12515 to 14820 | Reason: Move Limit Reached
+Game 7: V6 as White | LOST | Diff: -1060 | Score: 14460 to 15520 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -2305 | Score: 12515 to 14820 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -1060 | Score: 14460 to 15520 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -13085 | Score: 1735 to 14820 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV2 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -4716.5
+
+========== EngineV6 vs EngineV3 ==========
+Game 1: V6 as White | LOST | Diff: -10400 | Score: 5120 to 15520 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -13385 | Score: 1535 to 14920 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -2505 | Score: 12515 to 15020 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -10200 | Score: 5420 to 15620 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -2155 | Score: 12765 to 14920 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -12055 | Score: 3465 to 15520 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -10600 | Score: 5020 to 15620 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -11455 | Score: 4065 to 15520 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -1475 | Score: 14045 to 15520 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -11955 | Score: 3565 to 15520 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV3 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -8618.5
+
+========== EngineV6 vs EngineV4 ==========
+Game 1: V6 as White | LOST | Diff: -3285 | Score: 12235 to 15520 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -11455 | Score: 4065 to 15520 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -3285 | Score: 12235 to 15520 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -11455 | Score: 4065 to 15520 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -3285 | Score: 12235 to 15520 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -11455 | Score: 4065 to 15520 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -3285 | Score: 12235 to 15520 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -11455 | Score: 4065 to 15520 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -3285 | Score: 12235 to 15520 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -11455 | Score: 4065 to 15520 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV4 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -7370
+
+
+
+======================================================
+                NEW TOURNAMENT RUN
+======================================================
+
+Tournament settings:
+Games per pair: 10
+Max moves per game: 30 (60 ply)
+Time per move: 0.1s
+
+========== EngineV6 vs EngineV1 ==========
+Game 1: V6 as White | WON  | Diff: 2525 | Score: 15520 to 12995 | Reason: Move Limit Reached
+Game 2: V6 as Black | WON  | Diff: 2400 | Score: 15520 to 13120 | Reason: Move Limit Reached
+Game 3: V6 as White | WON  | Diff: 2805 | Score: 15620 to 12815 | Reason: Move Limit Reached
+Game 4: V6 as Black | WON  | Diff: 2525 | Score: 15520 to 12995 | Reason: Move Limit Reached
+Game 5: V6 as White | WON  | Diff: 2060 | Score: 15620 to 13560 | Reason: Move Limit Reached
+Game 6: V6 as Black | WON  | Diff: 1880 | Score: 14920 to 13040 | Reason: Move Limit Reached
+Game 7: V6 as White | WON  | Diff: 3130 | Score: 15520 to 12390 | Reason: Move Limit Reached
+Game 8: V6 as Black | WON  | Diff: 2780 | Score: 15620 to 12840 | Reason: Move Limit Reached
+Game 9: V6 as White | WON  | Diff: 2830 | Score: 15520 to 12690 | Reason: Move Limit Reached
+Game 10: V6 as Black | WON  | Diff: 1705 | Score: 15520 to 13815 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV1 ---
+EngineV6 Wins: 10, Losses: 0, Draws: 0 | Average Diff: 2464
+
+========== EngineV6 vs EngineV2 ==========
+Game 1: V6 as White | LOST | Diff: -1155 | Score: 14265 to 15420 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -12155 | Score: 3465 to 15620 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -1155 | Score: 14265 to 15420 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -12155 | Score: 3465 to 15620 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -1155 | Score: 14265 to 15420 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -11955 | Score: 3565 to 15520 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -1155 | Score: 14265 to 15420 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -11755 | Score: 3765 to 15520 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -1155 | Score: 14265 to 15420 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -11955 | Score: 3565 to 15520 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV2 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -6575
+
+========== EngineV6 vs EngineV3 ==========
+Game 1: V6 as White | LOST | Diff: -1675 | Score: 13745 to 15420 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -10500 | Score: 5120 to 15620 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -1780 | Score: 12715 to 14495 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -1030 | Score: 13790 to 14820 | Reason: Move Limit Reached
+Game 5: V6 as White | LOST | Diff: -1755 | Score: 13665 to 15420 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -10500 | Score: 5020 to 15520 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -11385 | Score: 3285 to 14670 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -11905 | Score: 3415 to 15320 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -12055 | Score: 2765 to 14820 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -12555 | Score: 2965 to 15520 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV3 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -7514
+
+========== EngineV6 vs EngineV4 ==========
+Game 1: V6 as White | LOST | Diff: -1505 | Score: 13415 to 14920 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -12925 | Score: 1815 to 14740 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -1350 | Score: 13470 to 14820 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -12925 | Score: 1815 to 14740 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -1505 | Score: 13415 to 14920 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -12925 | Score: 1815 to 14740 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -1505 | Score: 13415 to 14920 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -10995 | Score: 3465 to 14460 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -1505 | Score: 13415 to 14920 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -12925 | Score: 1815 to 14740 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV4 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -7006.5
+
+
+
+======================================================
+                NEW TOURNAMENT RUN
+======================================================
+
+Tournament settings:
+Games per pair: 10
+Max moves per game: 30 (60 ply)
+Time per move: 0.1s
+
+========== EngineV6 vs EngineV1 ==========
+Game 1: V6 as White | WON  | Diff: 1780 | Score: 15520 to 13740 | Reason: Move Limit Reached
+Game 2: V6 as Black | WON  | Diff: 2380 | Score: 15520 to 13140 | Reason: Move Limit Reached
+Game 3: V6 as White | WON  | Diff: 1880 | Score: 15620 to 13740 | Reason: Move Limit Reached
+Game 4: V6 as Black | WON  | Diff: 1980 | Score: 15620 to 13640 | Reason: Move Limit Reached
+Game 5: V6 as White | WON  | Diff: 2760 | Score: 15620 to 12860 | Reason: Move Limit Reached
+Game 6: V6 as Black | WON  | Diff: 2835 | Score: 15520 to 12685 | Reason: Move Limit Reached
+Game 7: V6 as White | WON  | Diff: 2760 | Score: 15620 to 12860 | Reason: Move Limit Reached
+Game 8: V6 as Black | WON  | Diff: 2230 | Score: 15520 to 13290 | Reason: Move Limit Reached
+Game 9: V6 as White | WON  | Diff: 1425 | Score: 15520 to 14095 | Reason: Move Limit Reached
+Game 10: V6 as Black | WON  | Diff: 2485 | Score: 15620 to 13135 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV1 ---
+EngineV6 Wins: 10, Losses: 0, Draws: 0 | Average Diff: 2251.5
+
+========== EngineV6 vs EngineV2 ==========
+Game 1: V6 as White | LOST | Diff: -1300 | Score: 14320 to 15620 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -11855 | Score: 3665 to 15520 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -10400 | Score: 5220 to 15620 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -11855 | Score: 3665 to 15520 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -1200 | Score: 14420 to 15620 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -11855 | Score: 3665 to 15520 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -1200 | Score: 14420 to 15620 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -11855 | Score: 3665 to 15520 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -1200 | Score: 14420 to 15620 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -11855 | Score: 3665 to 15520 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV2 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -7457.5
+
+========== EngineV6 vs EngineV3 ==========
+Game 1: V6 as White | LOST | Diff: -3005 | Score: 12015 to 15020 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -12100 | Score: 3420 to 15520 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -2230 | Score: 13390 to 15620 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -11255 | Score: 4265 to 15520 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -12480 | Score: 3040 to 15520 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -12100 | Score: 3420 to 15520 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -10900 | Score: 4620 to 15520 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -1955 | Score: 13465 to 15420 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -2555 | Score: 12865 to 15420 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -11955 | Score: 2965 to 14920 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV3 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -8053.5
+
+========== EngineV6 vs EngineV4 ==========
+Game 1: V6 as White | LOST | Diff: -10725 | Score: 4295 to 15020 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -1100 | Score: 14420 to 15520 | Reason: Move Limit Reached
+Game 3: V6 as White | LOST | Diff: -11325 | Score: 4295 to 15620 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -11005 | Score: 3915 to 14920 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -11445 | Score: 3795 to 15240 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -1100 | Score: 14420 to 15520 | Reason: Move Limit Reached
+Game 7: V6 as White | LOST | Diff: -11445 | Score: 3795 to 15240 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -1100 | Score: 14420 to 15520 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -10725 | Score: 4295 to 15020 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -10700 | Score: 4320 to 15020 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV4 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -8067
+
+
+
+======================================================
+                NEW TOURNAMENT RUN
+======================================================
+
+Tournament settings:
+Games per pair: 10
+Max moves per game: 30 (60 ply)
+Time per move: 0.1s
+
+========== EngineV6 vs EngineV1 ==========
+Game 1: V6 as White | WON  | Diff: 2380 | Score: 15420 to 13040 | Reason: Move Limit Reached
+Game 2: V6 as Black | WON  | Diff: 1280 | Score: 15520 to 14240 | Reason: Move Limit Reached
+Game 3: V6 as White | WON  | Diff: 2350 | Score: 15620 to 13270 | Reason: Move Limit Reached
+Game 4: V6 as Black | WON  | Diff: 1805 | Score: 15620 to 13815 | Reason: Move Limit Reached
+Game 5: V6 as White | WON  | Diff: 2850 | Score: 15420 to 12570 | Reason: Move Limit Reached
+Game 6: V6 as Black | WON  | Diff: 1430 | Score: 15520 to 14090 | Reason: Move Limit Reached
+Game 7: V6 as White | WON  | Diff: 2760 | Score: 15620 to 12860 | Reason: Move Limit Reached
+Game 8: V6 as Black | WON  | Diff: 12035 | Score: 15520 to 3485 | Reason: Prince Captured
+Game 9: V6 as White | WON  | Diff: 2440 | Score: 15620 to 13180 | Reason: Move Limit Reached
+Game 10: V6 as Black | WON  | Diff: 2410 | Score: 15420 to 13010 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV1 ---
+EngineV6 Wins: 10, Losses: 0, Draws: 0 | Average Diff: 3174
+
+========== EngineV6 vs EngineV2 ==========
+Game 1: V6 as White | LOST | Diff: -10700 | Score: 4920 to 15620 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -11955 | Score: 3665 to 15620 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -10700 | Score: 4920 to 15620 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -11955 | Score: 3665 to 15620 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -10700 | Score: 4920 to 15620 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -11955 | Score: 3665 to 15620 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -10700 | Score: 4920 to 15620 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -11955 | Score: 3665 to 15620 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -10700 | Score: 4920 to 15620 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -11955 | Score: 3665 to 15620 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV2 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -11327.5
+
+========== EngineV6 vs EngineV3 ==========
+Game 1: V6 as White | LOST | Diff: -10700 | Score: 4920 to 15620 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -11000 | Score: 4620 to 15620 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -10700 | Score: 4920 to 15620 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -12255 | Score: 3365 to 15620 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -10100 | Score: 5520 to 15620 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -10100 | Score: 5520 to 15620 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -10100 | Score: 5520 to 15620 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -2005 | Score: 13615 to 15620 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -10800 | Score: 4820 to 15620 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -10100 | Score: 5520 to 15620 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV3 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -9786
+
+========== EngineV6 vs EngineV4 ==========
+Game 1: V6 as White | LOST | Diff: -10900 | Score: 4620 to 15520 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -11350 | Score: 4170 to 15520 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -10300 | Score: 5320 to 15620 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -11350 | Score: 4170 to 15520 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -10300 | Score: 5320 to 15620 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -11350 | Score: 4170 to 15520 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -10300 | Score: 5320 to 15620 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -11350 | Score: 4170 to 15520 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -10300 | Score: 5320 to 15620 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -11350 | Score: 4170 to 15520 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV4 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -10885
+
+
+
+======================================================
+                NEW TOURNAMENT RUN
+======================================================
+
+Tournament settings:
+Games per pair: 10
+Max moves per game: 30 (60 ply)
+Time per move: 0.1s
+
+========== EngineV6 vs EngineV1 ==========
+Game 1: V6 as White | WON  | Diff: 1430 | Score: 15320 to 13890 | Reason: Move Limit Reached
+Game 2: V6 as Black | WON  | Diff: 1925 | Score: 15520 to 13595 | Reason: Move Limit Reached
+Game 3: V6 as White | WON  | Diff: 2685 | Score: 15620 to 12935 | Reason: Move Limit Reached
+Game 4: V6 as Black | WON  | Diff: 3430 | Score: 15520 to 12090 | Reason: Move Limit Reached
+Game 5: V6 as White | WON  | Diff: 3310 | Score: 15620 to 12310 | Reason: Move Limit Reached
+Game 6: V6 as Black | WON  | Diff: 2000 | Score: 15420 to 13420 | Reason: Move Limit Reached
+Game 7: V6 as White | WON  | Diff: 1380 | Score: 15520 to 14140 | Reason: Move Limit Reached
+Game 8: V6 as Black | WON  | Diff: 2305 | Score: 15420 to 13115 | Reason: Move Limit Reached
+Game 9: V6 as White | WON  | Diff: 2905 | Score: 15620 to 12715 | Reason: Move Limit Reached
+Game 10: V6 as Black | WON  | Diff: 3080 | Score: 15520 to 12440 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV1 ---
+EngineV6 Wins: 10, Losses: 0, Draws: 0 | Average Diff: 2445
+
+========== EngineV6 vs EngineV2 ==========
+Game 1: V6 as White | LOST | Diff: -10950 | Score: 4070 to 15020 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -11050 | Score: 4470 to 15520 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -12150 | Score: 2870 to 15020 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -1580 | Score: 13440 to 15020 | Reason: Move Limit Reached
+Game 5: V6 as White | LOST | Diff: -12150 | Score: 2870 to 15020 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -1580 | Score: 13440 to 15020 | Reason: Move Limit Reached
+Game 7: V6 as White | LOST | Diff: -12150 | Score: 2870 to 15020 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -1580 | Score: 13440 to 15020 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -12150 | Score: 2870 to 15020 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -1580 | Score: 13440 to 15020 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV2 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -7692
+
+========== EngineV6 vs EngineV3 ==========
+Game 1: V6 as White | LOST | Diff: -950 | Score: 14470 to 15420 | Reason: Move Limit Reached
+Game 2: V6 as Black | LOST | Diff: -3175 | Score: 12445 to 15620 | Reason: Move Limit Reached
+Game 3: V6 as White | LOST | Diff: -2700 | Score: 12920 to 15620 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -11525 | Score: 3495 to 15020 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -11250 | Score: 4170 to 15420 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -2255 | Score: 13365 to 15620 | Reason: Move Limit Reached
+Game 7: V6 as White | LOST | Diff: -1650 | Score: 13870 to 15520 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -12430 | Score: 2590 to 15020 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -11855 | Score: 3285 to 15140 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -12135 | Score: 3485 to 15620 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV3 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -6992.5
+
+========== EngineV6 vs EngineV4 ==========
+Game 1: V6 as White | LOST | Diff: -10600 | Score: 4920 to 15520 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -11875 | Score: 3745 to 15620 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -10600 | Score: 4920 to 15520 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -11875 | Score: 3745 to 15620 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -3185 | Score: 12235 to 15420 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -11875 | Score: 3745 to 15620 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -10600 | Score: 4920 to 15520 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -11875 | Score: 3745 to 15620 | Reason: Prince Captured
+Game 9: V6 as White | LOST | Diff: -3185 | Score: 12235 to 15420 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -3105 | Score: 12515 to 15620 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV4 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -8877.5
+
+
+
+======================================================
+                NEW TOURNAMENT RUN
+======================================================
+
+Tournament settings:
+Games per pair: 10
+Max moves per game: 30 (60 ply)
+Time per move: 0.1s
+
+========== EngineV6 vs EngineV1 ==========
+Game 1: V6 as White | WON  | Diff: 2205 | Score: 15620 to 13415 | Reason: Move Limit Reached
+Game 2: V6 as Black | WON  | Diff: 2380 | Score: 15520 to 13140 | Reason: Move Limit Reached
+Game 3: V6 as White | WON  | Diff: 2355 | Score: 15420 to 13065 | Reason: Move Limit Reached
+Game 4: V6 as Black | WON  | Diff: 3155 | Score: 15520 to 12365 | Reason: Move Limit Reached
+Game 5: V6 as White | WON  | Diff: 2625 | Score: 15620 to 12995 | Reason: Move Limit Reached
+Game 6: V6 as Black | WON  | Diff: 1280 | Score: 15620 to 14340 | Reason: Move Limit Reached
+Game 7: V6 as White | WON  | Diff: 1175 | Score: 15520 to 14345 | Reason: Move Limit Reached
+Game 8: V6 as Black | WON  | Diff: 3105 | Score: 15620 to 12515 | Reason: Move Limit Reached
+Game 9: V6 as White | WON  | Diff: 2555 | Score: 15520 to 12965 | Reason: Move Limit Reached
+Game 10: V6 as Black | WON  | Diff: 2160 | Score: 15520 to 13360 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV1 ---
+EngineV6 Wins: 10, Losses: 0, Draws: 0 | Average Diff: 2299.5
+
+========== EngineV6 vs EngineV2 ==========
+Game 1: V6 as White | LOST | Diff: -10400 | Score: 5220 to 15620 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -13080 | Score: 2540 to 15620 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -10400 | Score: 5220 to 15620 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -1350 | Score: 14170 to 15520 | Reason: Move Limit Reached
+Game 5: V6 as White | LOST | Diff: -10400 | Score: 5220 to 15620 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -1350 | Score: 14170 to 15520 | Reason: Move Limit Reached
+Game 7: V6 as White | LOST | Diff: -10400 | Score: 5220 to 15620 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -1350 | Score: 14170 to 15520 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -10400 | Score: 5220 to 15620 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -1350 | Score: 14170 to 15520 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV2 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -7048
+
+========== EngineV6 vs EngineV3 ==========
+Game 1: V6 as White | LOST | Diff: -11685 | Score: 3135 to 14820 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -11455 | Score: 4165 to 15620 | Reason: Prince Captured
+Game 3: V6 as White | LOST | Diff: -2060 | Score: 12335 to 14395 | Reason: Move Limit Reached
+Game 4: V6 as Black | LOST | Diff: -11730 | Score: 3890 to 15620 | Reason: Prince Captured
+Game 5: V6 as White | LOST | Diff: -1030 | Score: 13790 to 14820 | Reason: Move Limit Reached
+Game 6: V6 as Black | LOST | Diff: -10905 | Score: 4115 to 15020 | Reason: Prince Captured
+Game 7: V6 as White | LOST | Diff: -2605 | Score: 13015 to 15620 | Reason: Move Limit Reached
+Game 8: V6 as Black | LOST | Diff: -1455 | Score: 13565 to 15020 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -1525 | Score: 13715 to 15240 | Reason: Move Limit Reached
+Game 10: V6 as Black | LOST | Diff: -12830 | Score: 2190 to 15020 | Reason: Prince Captured
+--- Summary EngineV6 vs EngineV3 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -6728
+
+========== EngineV6 vs EngineV4 ==========
+Game 1: V6 as White | LOST | Diff: -11350 | Score: 4070 to 15420 | Reason: Prince Captured
+Game 2: V6 as Black | LOST | Diff: -2375 | Score: 13145 to 15520 | Reason: Move Limit Reached
+Game 3: V6 as White | LOST | Diff: -11350 | Score: 4070 to 15420 | Reason: Prince Captured
+Game 4: V6 as Black | LOST | Diff: -2375 | Score: 13145 to 15520 | Reason: Move Limit Reached
+Game 5: V6 as White | LOST | Diff: -11350 | Score: 4070 to 15420 | Reason: Prince Captured
+Game 6: V6 as Black | LOST | Diff: -2375 | Score: 13145 to 15520 | Reason: Move Limit Reached
+Game 7: V6 as White | LOST | Diff: -11350 | Score: 4070 to 15420 | Reason: Prince Captured
+Game 8: V6 as Black | LOST | Diff: -2375 | Score: 13145 to 15520 | Reason: Move Limit Reached
+Game 9: V6 as White | LOST | Diff: -11105 | Score: 4090 to 15195 | Reason: Prince Captured
+Game 10: V6 as Black | LOST | Diff: -2375 | Score: 13145 to 15520 | Reason: Move Limit Reached
+--- Summary EngineV6 vs EngineV4 ---
+EngineV6 Wins: 0, Losses: 10, Draws: 0 | Average Diff: -6838
+
