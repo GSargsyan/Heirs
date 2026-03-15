@@ -10,7 +10,8 @@
 enum Color {
     WHITE = 0,
     BLACK = 1,
-    COLOR_NB = 2
+    COLOR_NB = 2,
+    COLOR_OFFBOARD = 3
 };
 
 enum PieceType {
@@ -23,7 +24,8 @@ enum PieceType {
     TUTOR = 6,
     SCOUT = 7,
     SIBLING = 8,
-    PIECE_NB = 9
+    OFFBOARD = 9,
+    PIECE_NB = 10
 };
 
 struct Move {
@@ -63,6 +65,12 @@ public:
     bool is_game_over() const;
     int get_half_move_clock() const { return half_move_clock; }
     
+    // Piece lists access for fast evaluation
+    const int* get_white_pieces() const { return whitePieces; }
+    int get_white_piece_count() const { return whitePieceCount; }
+    const int* get_black_pieces() const { return blackPieces; }
+    int get_black_piece_count() const { return blackPieceCount; }
+    
     // Draw detection
     bool is_repetition() const;
     bool is_fifty_moves() const;
@@ -72,8 +80,8 @@ public:
     void print() const;
     
 private:
-    PieceType pieces[144];
-    Color colors[144];
+    PieceType pieces[256];
+    Color colors[256];
     Color turn;
     
     // Zobrist Hashing
@@ -84,7 +92,7 @@ private:
     int half_move_clock;
     std::vector<int> half_move_history;
     
-    static uint64_t piece_keys[144][2][10];
+    static uint64_t piece_keys[256][2][10];
     static uint64_t side_key;
     static bool zobrist_initialized;
     static void init_zobrist();
@@ -92,8 +100,18 @@ private:
     // Helper counts for fast check
     int prince_count[2]; 
     
+    // Piece lists for fast generation
+    int whitePieces[36];
+    int whitePieceCount;
+    int blackPieces[36];
+    int blackPieceCount;
+    int pieceIndex[256];
+    
     // Helper methods
     void add_move(std::vector<Move>& moves, int from, int to) const;
+    void add_piece_to_list(int sq, Color c);
+    void remove_piece_from_list(int sq, Color c);
+    void move_piece_in_list(int from, int to, Color c);
 };
 
 #endif // BOARD_H
