@@ -1,4 +1,5 @@
 #include "../src/engine_v1.h"
+#include "../src/engine_v2.h"
 #include <iostream>
 #include <vector>
 #ifdef _WIN32
@@ -31,8 +32,8 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 1;
-const double TIME_TO_THINK_BLACK = 1;
+const double TIME_TO_THINK_WHITE = 0.5;
+const double TIME_TO_THINK_BLACK = 0.5;
 
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
@@ -43,7 +44,7 @@ int main(int argc, char* argv[]) {
     Board b;
     // b.reset(); // Constructor calls reset
     
-    EngineV1 engine_white;
+    EngineV2 engine_white;
     EngineV1 engine_black;
     
     std::cout << "Starting match with time limits: White=" << TIME_TO_THINK_WHITE << "s, Black=" << TIME_TO_THINK_BLACK << "s" << std::endl;
@@ -72,7 +73,9 @@ int main(int argc, char* argv[]) {
         
         if (m.from == 0 && m.to == 0) {
             std::cout << "Engine returned null move (Resign/No moves?)" << std::endl;
-            if (b.generate_moves().empty()) {
+            MoveList m_list;
+            b.generate_moves(m_list);
+            if (m_list.count == 0) {
                 std::cout << "Stalemate detected." << std::endl;
             }
             break;

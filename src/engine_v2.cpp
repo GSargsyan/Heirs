@@ -1,4 +1,4 @@
-#include "engine_v1.h"
+#include "engine_v2.h"
 #include <algorithm>
 #include <iostream>
 #include <chrono>
@@ -7,11 +7,11 @@
 
 using namespace std::chrono;
 
-// VERSION 1 Engine
-EngineV1::EngineV1() : nodes_visited(0), last_depth(0) {}
+// VERSION 2 Engine
+EngineV2::EngineV2() : nodes_visited(0), last_depth(0) {}
 
-long long EngineV1::get_nodes_visited() const { return nodes_visited; }
-int EngineV1::get_max_depth() const { return last_depth; }
+long long EngineV2::get_nodes_visited() const { return nodes_visited; }
+int EngineV2::get_max_depth() const { return last_depth; }
 
 // Heirs Constants for Evaluation
 namespace EvalConstants {
@@ -113,7 +113,7 @@ const int PST_CENTER[144] = {
     -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10
 };
 
-int EngineV1::evaluate(const Board& b) {
+int EngineV2::evaluate(const Board& b) {
     int mg_score = 0; // Middlegame score
     
     // We need to detect if we are winning or losing to adjust aggressiveness
@@ -206,26 +206,26 @@ int EngineV1::evaluate(const Board& b) {
     return mg_score;
 }
 
-bool EngineV1::is_time_up() {
+bool EngineV2::is_time_up() {
     auto now = steady_clock::now();
     duration<double> elapsed = now - start_time;
     return elapsed.count() >= time_limit_sec;
 }
 
 // RAII wrapper for move making/unmaking
-struct ScopedMoveV1 {
+struct ScopedMoveV2 {
     Board& b;
     Move m;
-    ScopedMoveV1(Board& board, const Move& move) : b(board), m(move) {
+    ScopedMoveV2(Board& board, const Move& move) : b(board), m(move) {
         b.make_move(m);
     }
-    ~ScopedMoveV1() {
+    ~ScopedMoveV2() {
         b.unmake_move(m);
     }
 };
 
 // Alpha-Beta Search
-int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta) {
+int EngineV2::alphabeta(Board& b, int depth, int alpha, int beta) {
     nodes_visited++;
     
     // Check for draw by repetition or 50-move rule
@@ -256,16 +256,38 @@ int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta) {
         return 0; // Draw
     }
     
-    // Move ordering? (Captures first?)
-    // Basic ordering: if capture, put front.
-    // For now, simpler improvement first.
+    // Move ordering: MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
+    std::vector<int> move_scores(moves.count, 0);
+    for (int i = 0; i < moves.count; ++i) {
+        PieceType captured = moves.moves[i].captured;
+        if (captured != NO_PIECE) {
+            PieceType attacker = b.piece_at(moves.moves[i].from);
+            // Captures get a massive score boost so they are searched first
+            move_scores[i] = 1000000 + (EvalConstants::PIECE_VALUES[captured] * 10) - EvalConstants::PIECE_VALUES[attacker];
+        } else {
+            // Quiet moves (non-captures) get a score of 0 for now
+            move_scores[i] = 0;
+        }
+    }
+
+    // Sort moves based on scores (Descending)
+    for (int i = 0; i < moves.count - 1; ++i) {
+        int best_idx = i;
+        for (int j = i + 1; j < moves.count; ++j) {
+            if (move_scores[j] > move_scores[best_idx]) {
+                best_idx = j;
+            }
+        }
+        std::swap(move_scores[i], move_scores[best_idx]);
+        std::swap(moves.moves[i], moves.moves[best_idx]);
+    }
     
     if (side == WHITE) { // Maximize
         int max_eval = -2000000;
         for (int i = 0; i < moves.count; ++i) {
             Move move = moves.moves[i];
             {
-                ScopedMoveV1 sm(b, move);
+                ScopedMoveV2 sm(b, move);
                 int eval = alphabeta(b, depth - 1, alpha, beta);
                 max_eval = std::max(max_eval, eval);
                 alpha = std::max(alpha, eval);
@@ -278,7 +300,7 @@ int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta) {
         for (int i = 0; i < moves.count; ++i) {
             Move move = moves.moves[i];
             {
-                ScopedMoveV1 sm(b, move);
+                ScopedMoveV2 sm(b, move);
                 int eval = alphabeta(b, depth - 1, alpha, beta);
                 min_eval = std::min(min_eval, eval);
                 beta = std::min(beta, eval);
@@ -289,7 +311,7 @@ int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta) {
     }
 }
 
-Move EngineV1::search(Board& b, double time_limit) {
+Move EngineV2::search(Board& b, double time_limit) {
     start_time = steady_clock::now();
     time_limit_sec = time_limit;
     nodes_visited = 0;
@@ -307,6 +329,30 @@ Move EngineV1::search(Board& b, double time_limit) {
             
             if (moves.count == 0) return Move();
             
+            // Move ordering: MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
+            std::vector<int> move_scores(moves.count, 0);
+            for (int i = 0; i < moves.count; ++i) {
+                PieceType captured = moves.moves[i].captured;
+                if (captured != NO_PIECE) {
+                    PieceType attacker = b.piece_at(moves.moves[i].from);
+                    move_scores[i] = 1000000 + (EvalConstants::PIECE_VALUES[captured] * 10) - EvalConstants::PIECE_VALUES[attacker];
+                } else {
+                    move_scores[i] = 0;
+                }
+            }
+
+            // Sort moves based on scores (Descending)
+            for (int i = 0; i < moves.count - 1; ++i) {
+                int best_idx = i;
+                for (int j = i + 1; j < moves.count; ++j) {
+                    if (move_scores[j] > move_scores[best_idx]) {
+                        best_idx = j;
+                    }
+                }
+                std::swap(move_scores[i], move_scores[best_idx]);
+                std::swap(moves.moves[i], moves.moves[best_idx]);
+            }
+
             Move current_best_move;
             int best_score;
             int alpha = -2000000;
@@ -318,7 +364,7 @@ Move EngineV1::search(Board& b, double time_limit) {
                     Move move = moves.moves[i];
                     int score;
                     {
-                        ScopedMoveV1 sm(b, move);
+                        ScopedMoveV2 sm(b, move);
                         score = alphabeta(b, depth - 1, alpha, beta);
                     }
                     
@@ -336,7 +382,7 @@ Move EngineV1::search(Board& b, double time_limit) {
                     Move move = moves.moves[i];
                     int score;
                     {
-                        ScopedMoveV1 sm(b, move);
+                        ScopedMoveV2 sm(b, move);
                         score = alphabeta(b, depth - 1, alpha, beta);
                     }
                     

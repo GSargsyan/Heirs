@@ -41,6 +41,18 @@ struct Move {
     }
 };
 
+struct MoveList {
+    Move moves[256];
+    int count = 0;
+    
+    void add(int from, int to, PieceType captured) {
+        moves[count].from = from;
+        moves[count].to = to;
+        moves[count].captured = captured;
+        count++;
+    }
+};
+
 class Board {
 public:
     Board();
@@ -56,7 +68,7 @@ public:
     void clear_piece(int sq);
     
     // Move generation and handling
-    std::vector<Move> generate_moves() const;
+    void generate_moves(MoveList& list) const;
     void make_move(const Move& m);
     void unmake_move(const Move& m);
     
@@ -108,7 +120,6 @@ private:
     int pieceIndex[256];
     
     // Helper methods
-    void add_move(std::vector<Move>& moves, int from, int to) const;
     void add_piece_to_list(int sq, Color c);
     void remove_piece_from_list(int sq, Color c);
     void move_piece_in_list(int from, int to, Color c);

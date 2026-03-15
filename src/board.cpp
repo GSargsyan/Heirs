@@ -98,7 +98,7 @@ void Board::reset() {
     prince_count[WHITE] = 0;
     prince_count[BLACK] = 0;
     half_move_clock = 0;
-    half_move_history.reserve(100);
+    half_move_history.reserve(2000);
     half_move_history.clear();
     turn = WHITE;
     
@@ -130,6 +130,7 @@ void Board::reset() {
         zobrist_key ^= piece_keys[160+i][BLACK][BABY];
     }
     
+    history.reserve(2000);
     history.clear();
     half_move_history.clear();
 }
@@ -169,21 +170,16 @@ static const int DIRECTIONS[8] = {
     17, 15, -15, -17 // Diagonal: NE, NW, SE, SW
 };
 
-void Board::add_move(std::vector<Move>& moves, int from, int to) const {
-    moves.emplace_back(from, to, pieces[to]);
-}
-
 #define IS_OK(sq) ((sq) >= 0 && (sq) < 256 && pieces[(sq)] != OFFBOARD)
 
-std::vector<Move> Board::generate_moves() const {
-    std::vector<Move> moves;
-    moves.reserve(100);
+void Board::generate_moves(MoveList& list) const {
+    list.count = 0;
     
-    const int* list = (turn == WHITE) ? whitePieces : blackPieces;
+    const int* piece_list = (turn == WHITE) ? whitePieces : blackPieces;
     int count = (turn == WHITE) ? whitePieceCount : blackPieceCount;
     
     for (int i = 0; i < count; ++i) {
-        int sq = list[i];
+        int sq = piece_list[i];
         PieceType p = pieces[sq];
         
         switch (p) {
@@ -193,12 +189,12 @@ std::vector<Move> Board::generate_moves() const {
                 if (IS_OK(target)) {
                     Color target_color = colors[target];
                     if (target_color != turn) {
-                        add_move(moves, sq, target);
+                        list.add(sq, target, pieces[target]);
                         if (target_color == COLOR_NB) { 
                             int target2 = target + forward;
                             if (IS_OK(target2)) {
                                 if (colors[target2] != turn) {
-                                    add_move(moves, sq, target2);
+                                    list.add(sq, target2, pieces[target2]);
                                 }
                             }
                         }
@@ -211,7 +207,7 @@ std::vector<Move> Board::generate_moves() const {
                     int target = sq + dir;
                     if (IS_OK(target)) {
                          if (colors[target] != turn) {
-                             add_move(moves, sq, target);
+                             list.add(sq, target, pieces[target]);
                          }
                     }
                 }
@@ -225,7 +221,7 @@ std::vector<Move> Board::generate_moves() const {
                         if (!IS_OK(target)) break;
                         Color target_color = colors[target];
                         if (target_color == turn) break;
-                        add_move(moves, sq, target);
+                        list.add(sq, target, pieces[target]);
                         if (target_color != COLOR_NB) break;
                     }
                 }
@@ -236,7 +232,7 @@ std::vector<Move> Board::generate_moves() const {
                     int target = sq + DIRECTIONS[k];
                     if (IS_OK(target)) {
                         if (colors[target] != turn) {
-                            add_move(moves, sq, target);
+                            list.add(sq, target, pieces[target]);
                         }
                     }
                 }
@@ -250,7 +246,7 @@ std::vector<Move> Board::generate_moves() const {
                         if (!IS_OK(target)) break;
                         Color target_color = colors[target];
                         if (target_color == turn) break; 
-                        add_move(moves, sq, target);
+                        list.add(sq, target, pieces[target]);
                         if (target_color != COLOR_NB) break;
                     }
                 }
@@ -264,7 +260,7 @@ std::vector<Move> Board::generate_moves() const {
                         if (!IS_OK(target)) break;
                         Color target_color = colors[target];
                         if (target_color == turn) break;
-                        add_move(moves, sq, target);
+                        list.add(sq, target, pieces[target]);
                         if (target_color != COLOR_NB) break;
                     }
                 }
@@ -280,7 +276,7 @@ std::vector<Move> Board::generate_moves() const {
                         int target = center + dc;
                         if (IS_OK(target)) {
                             if (colors[target] != turn) {
-                                add_move(moves, sq, target);
+                                list.add(sq, target, pieces[target]);
                             }
                         }
                     }
@@ -304,7 +300,7 @@ std::vector<Move> Board::generate_moves() const {
                                  }
                              }
                              if (has_friend) {
-                                 add_move(moves, sq, target);
+                                 list.add(sq, target, pieces[target]);
                              }
                          }
                     }
@@ -314,7 +310,6 @@ std::vector<Move> Board::generate_moves() const {
             default: break;
         }
     }
-    return moves;
 }
 
 uint64_t Board::piece_keys[256][2][10];
