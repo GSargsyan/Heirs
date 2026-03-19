@@ -1,5 +1,6 @@
 #include "../src/engine_v1.h"
 #include "../src/engine_v2.h"
+#include "../src/engine_v3.h"
 #include <iostream>
 #include <vector>
 #ifdef _WIN32
@@ -44,7 +45,7 @@ int main(int argc, char* argv[]) {
     Board b;
     // b.reset(); // Constructor calls reset
     
-    EngineV2 engine_white;
+    EngineV3 engine_white;
     EngineV1 engine_black;
     
     std::cout << "Starting match with time limits: White=" << TIME_TO_THINK_WHITE << "s, Black=" << TIME_TO_THINK_BLACK << "s" << std::endl;

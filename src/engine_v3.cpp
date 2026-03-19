@@ -1,4 +1,4 @@
-#include "engine_v2.h"
+#include "engine_v3.h"
 #include <algorithm>
 #include <iostream>
 #include <chrono>
@@ -7,11 +7,14 @@
 
 using namespace std::chrono;
 
-// VERSION 2 Engine
-EngineV2::EngineV2() : nodes_visited(0), last_depth(0) {}
+extern bool DEBUG_EVAL_V3;
+bool DEBUG_EVAL_V3 = false;
 
-long long EngineV2::get_nodes_visited() const { return nodes_visited; }
-int EngineV2::get_max_depth() const { return last_depth; }
+// VERSION 3 Engine
+EngineV3::EngineV3() : nodes_visited(0), last_depth(0) {}
+
+long long EngineV3::get_nodes_visited() const { return nodes_visited; }
+int EngineV3::get_max_depth() const { return last_depth; }
 
 // Heirs Constants for Evaluation
 namespace EvalConstants {
@@ -115,119 +118,252 @@ const int PST_CENTER[144] = {
     -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10
 };
 
-int EngineV2::evaluate(const Board& b) {
+// Phase Constants and tables
+inline int get_piece_phase(PieceType p) {
+    switch(p) {
+        case BABY: return 1;
+        case PRINCE: return 0;
+        case PONY: return 5;
+        case SIBLING: return 8;
+        case TUTOR: return 10;
+        case GUARD: return 12;
+        case SCOUT: return 20;
+        case PRINCESS: return 40;
+        default: return 0;
+    }
+}
+
+const int MAX_PHASE = 324;
+
+const int PST_BABY_EG[144] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+const int PST_PRINCE_EG[144] = {
+    -50, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -50,
+    -30, -10,   0,   0,   0,   0,   0,   0,   0,   0, -10, -30,
+    -30,   0,  10,  10,  10,  10,  10,  10,  10,  10,   0, -30,
+    -30,   0,  10,  20,  20,  20,  20,  20,  20,  10,   0, -30,
+    -30,   0,  10,  20,  30,  30,  30,  30,  20,  10,   0, -30,
+    -30,   0,  10,  20,  30,  40,  40,  30,  20,  10,   0, -30,
+    -30,   0,  10,  20,  30,  40,  40,  30,  20,  10,   0, -30,
+    -30,   0,  10,  20,  30,  30,  30,  30,  20,  10,   0, -30,
+    -30,   0,  10,  20,  20,  20,  20,  20,  20,  10,   0, -30,
+    -30,   0,  10,  10,  10,  10,  10,  10,  10,  10,   0, -30,
+    -30, -10,   0,   0,   0,   0,   0,   0,   0,   0, -10, -30,
+    -50, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -50
+};
+
+const int PST_CENTER_EG[144] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+int EngineV3::evaluate(const Board& b, EvalComponents* debug_info) {
     int mg_score = 0; // Middlegame score
-    
-    // We need to detect if we are winning or losing to adjust aggressiveness
-    // But for V1, let's stick to a solid static eval first.
+    int eg_score = 0; // Endgame score
+    int game_phase = 0;
 
     int white_prince_sq = -1;
     int black_prince_sq = -1;
 
-    // 1. MATERIAL & POSITION (via PST)
-    auto eval_list = [&](const int* list, int count, Color c) {
+    // Calculate phase first
+    for (int i = 0; i < b.get_white_piece_count(); ++i) {
+        game_phase += get_piece_phase(b.piece_at(b.get_white_pieces()[i]));
+    }
+    for (int i = 0; i < b.get_black_piece_count(); ++i) {
+        game_phase += get_piece_phase(b.piece_at(b.get_black_pieces()[i]));
+    }
+    
+    // Find princes first for tropism
+    for (int i = 0; i < b.get_white_piece_count(); ++i) {
+        if (b.piece_at(b.get_white_pieces()[i]) == PRINCE) white_prince_sq = b.get_white_pieces()[i];
+    }
+    for (int i = 0; i < b.get_black_piece_count(); ++i) {
+        if (b.piece_at(b.get_black_pieces()[i]) == PRINCE) black_prince_sq = b.get_black_pieces()[i];
+    }
+
+    int mg_mat = 0, eg_mat = 0;
+    int mg_pst_baby = 0, eg_pst_baby = 0;
+    int mg_pst_prince = 0, eg_pst_prince = 0;
+    int mg_pst_center = 0, eg_pst_center = 0;
+    int eg_tropism = 0;
+
+    // 1. MATERIAL & POSITION
+    auto eval_list = [&](const int* list, int count, Color c, int enemy_prince_sq) {
         int mg = 0;
+        int eg = 0;
         for (int i = 0; i < count; ++i) {
             int sq = list[i];
             PieceType p = b.piece_at(sq);
             int val = EvalConstants::PIECE_VALUES[p];
-            int pos_bonus = 0;
+            int mg_pos_bonus = 0;
+            int eg_pos_bonus = 0;
 
-            // Apply PST based on perspective
             int pst_sq = to_12x12(sq);
             int pst_idx = (c == WHITE) ? pst_sq : mirror_sq(pst_sq);
 
+            int t_mg_pst_baby = 0, t_eg_pst_baby = 0;
+            int t_mg_pst_prince = 0, t_eg_pst_prince = 0;
+            int t_mg_pst_center = 0, t_eg_pst_center = 0;
+
             switch (p) {
-                case BABY:      pos_bonus = PST_BABY[pst_idx]; break;
-                case PRINCE:    
-                    pos_bonus = PST_PRINCE[pst_idx]; 
-                    if (c == WHITE) white_prince_sq = sq; else black_prince_sq = sq;
+                case BABY:
+                    mg_pos_bonus = PST_BABY[pst_idx];
+                    eg_pos_bonus = PST_BABY_EG[pst_idx];
+                    t_mg_pst_baby = mg_pos_bonus;
+                    t_eg_pst_baby = eg_pos_bonus;
                     break;
-                // case SCOUT:     pos_bonus = PST_SCOUT[pst_idx]; break;
-                default:        pos_bonus = PST_CENTER[pst_idx]; break; 
+                case PRINCE:    
+                    mg_pos_bonus = PST_PRINCE[pst_idx]; 
+                    eg_pos_bonus = PST_PRINCE_EG[pst_idx];
+                    t_mg_pst_prince = mg_pos_bonus;
+                    t_eg_pst_prince = eg_pos_bonus;
+                    break;
+                default:
+                    mg_pos_bonus = PST_CENTER[pst_idx]; 
+                    eg_pos_bonus = PST_CENTER_EG[pst_idx];
+                    t_mg_pst_center = mg_pos_bonus;
+                    t_eg_pst_center = eg_pos_bonus;
+                    break; 
             }
 
-            // Sibling Logic: Bonus for being near friends (any friend)
-            if (p == SIBLING) {
-                // ... (Insert simple adjacency check logic here if available in Board class)
-                // If not, simplify: Sibling likes center (already in PST_CENTER)
+            int t_tropism = 0;
+            // Tropism: pieces should tend toward enemy prince in endgame
+            if (p != PRINCE && enemy_prince_sq != -1) {
+                int r1 = (sq >> 4) & 15;
+                int c1 = sq & 15;
+                int r2 = (enemy_prince_sq >> 4) & 15;
+                int c2 = enemy_prince_sq & 15;
+                int dist = std::abs(r1 - r2) + std::abs(c1 - c2);
+                
+                // Reward closeness
+                t_tropism = std::max(0, (24 - dist) * 2);
+                eg_pos_bonus += t_tropism;
             }
 
-            mg += (val + pos_bonus);
+            if (debug_info) {
+                if (c == WHITE) {
+                    mg_mat += val; eg_mat += val;
+                    mg_pst_baby += t_mg_pst_baby; eg_pst_baby += t_eg_pst_baby;
+                    mg_pst_prince += t_mg_pst_prince; eg_pst_prince += t_eg_pst_prince;
+                    mg_pst_center += t_mg_pst_center; eg_pst_center += t_eg_pst_center;
+                    eg_tropism += t_tropism;
+                } else {
+                    mg_mat -= val; eg_mat -= val;
+                    mg_pst_baby -= t_mg_pst_baby; eg_pst_baby -= t_eg_pst_baby;
+                    mg_pst_prince -= t_mg_pst_prince; eg_pst_prince -= t_eg_pst_prince;
+                    mg_pst_center -= t_mg_pst_center; eg_pst_center -= t_eg_pst_center;
+                    eg_tropism -= t_tropism;
+                }
+            }
+
+            mg += (val + mg_pos_bonus);
+            eg += (val + eg_pos_bonus);
         }
-        return mg;
+        return std::make_pair(mg, eg);
     };
 
-    mg_score += eval_list(b.get_white_pieces(), b.get_white_piece_count(), WHITE);
-    mg_score -= eval_list(b.get_black_pieces(), b.get_black_piece_count(), BLACK);
+    auto w_scores = eval_list(b.get_white_pieces(), b.get_white_piece_count(), WHITE, black_prince_sq);
+    auto b_scores = eval_list(b.get_black_pieces(), b.get_black_piece_count(), BLACK, white_prince_sq);
 
-    // 2. MOBILITY (Crucial for 12x12)
-    // We estimate mobility by counting legal moves. 
-    // This is expensive if done fully, so we do a "pseudo-mobility" or rely on the Board's move gen if fast.
-    // If your move generation is slow, skip this or approximate it by counting empty adjacent squares.
-    
-    // Assuming you have a function `b.generate_moves(color)` or similar that is reasonably fast:
-    // If not, implementing a simplified "count empty neighbors" loop is better than nothing.
-    
-    /* 
-    // Pseudo-code for mobility bonus
-    std::vector<Move> white_moves, black_moves;
-    b.get_moves(WHITE, white_moves);
-    b.get_moves(BLACK, black_moves);
-    
-    // Weight mobility: 5 points per move
-    mg_score += (white_moves.size() * 5);
-    mg_score -= (black_moves.size() * 5);
-    */
+    mg_score = w_scores.first - b_scores.first;
+    eg_score = w_scores.second - b_scores.second;
 
-    // 3. PRINCE SAFETY & ATTACK
-    // Instead of simple distance, check "Attackers in Sector"
-    if (white_prince_sq != -1 && black_prince_sq != -1) {
-        int w_pr_r = white_prince_sq >> 4;
-        int w_pr_c = white_prince_sq & 15;
-        int b_pr_r = black_prince_sq >> 4;
-        int b_pr_c = black_prince_sq & 15;
+    // 2. ENEMY PRINCE MOBILITY TROPISM
+    // Higher empty sqcount = more mobility
+    auto count_empty_neighbors = [&](int sq) {
+        if (sq == -1) return 0;
+        int empty_count = 0;
+        int r = (sq >> 4) & 15;
+        int c = sq & 15;
+        int dr[] = {-1, -1, -1, 0, 0, 1, 1, 1};
+        int dc[] = {-1, 0, 1, -1, 1, -1, 0, 1};
+        for (int i = 0; i < 8; ++i) {
+            int nr = r + dr[i];
+            int nc = c + dc[i];
+            if (nr >= 0 && nr < 12 && nc >= 0 && nc < 12) {
+                int nsq = (nr << 4) | nc;
+                if (b.piece_at(nsq) == NO_PIECE) empty_count++;
+            }
+        }
+        return empty_count;
+    };
 
-        // Reward White pieces close to Black Prince (Manhattan dist < 4)
-        // This is safer than the "Global Distance" you used before.
-        // We iterate pieces again? No, too slow. 
-        // Optimization: Do this inside the main loop above.
-        
-        // Re-implementing simplified distance logic:
-        int dist = std::abs(w_pr_r - b_pr_r) + std::abs(w_pr_c - b_pr_c);
-        
-        // As the game progresses (material drops), kings should avoid each other 
-        // unless one has a massive advantage. 
-        // But in Heirs, Prince capture is instant win. 
-        
-        // Aggression Bonus:
-        // Calculate distance between White Scout/Princess and Black Prince.
-        // Give bonus if low.
+    int w_prince_moves = count_empty_neighbors(white_prince_sq);
+    int b_prince_moves = count_empty_neighbors(black_prince_sq);
+    
+    // Less mobility for enemy prince is better for us
+    // So give us points if our prince has more mobility, and penalize if enemy has more mobility.
+    eg_score += w_prince_moves * 10;
+    eg_score -= b_prince_moves * 10;
+
+    // 3. TAPERED BLEND
+    int phase = std::min(game_phase, MAX_PHASE);
+    int final_score = (mg_score * phase + eg_score * (MAX_PHASE - phase)) / MAX_PHASE;
+
+    if (debug_info) {
+        debug_info->mg_mat = mg_mat;
+        debug_info->eg_mat = eg_mat;
+        debug_info->mg_pst_baby = mg_pst_baby;
+        debug_info->eg_pst_baby = eg_pst_baby;
+        debug_info->mg_pst_prince = mg_pst_prince;
+        debug_info->eg_pst_prince = eg_pst_prince;
+        debug_info->mg_pst_center = mg_pst_center;
+        debug_info->eg_pst_center = eg_pst_center;
+        debug_info->eg_tropism = eg_tropism;
+        debug_info->w_prince_mobility_score = w_prince_moves * 10;
+        debug_info->b_prince_mobility_score = -(b_prince_moves * 10);
+        debug_info->phase = phase;
+        debug_info->mg_total = mg_score;
+        debug_info->eg_total = eg_score;
+        debug_info->final_total = final_score;
     }
 
-    return mg_score;
+    return final_score;
 }
 
-bool EngineV2::is_time_up() {
+bool EngineV3::is_time_up() {
     auto now = steady_clock::now();
     duration<double> elapsed = now - start_time;
     return elapsed.count() >= time_limit_sec;
 }
 
 // RAII wrapper for move making/unmaking
-struct ScopedMoveV2 {
+struct ScopedMoveV3 {
     Board& b;
     Move m;
-    ScopedMoveV2(Board& board, const Move& move) : b(board), m(move) {
+    ScopedMoveV3(Board& board, const Move& move) : b(board), m(move) {
         b.make_move(m);
     }
-    ~ScopedMoveV2() {
+    ~ScopedMoveV3() {
         b.unmake_move(m);
     }
 };
 
 // Alpha-Beta Search
-int EngineV2::alphabeta(Board& b, int depth, int alpha, int beta) {
+int EngineV3::alphabeta(Board& b, int depth, int alpha, int beta) {
     nodes_visited++;
     
     // Check for draw by repetition or 50-move rule
@@ -289,7 +425,7 @@ int EngineV2::alphabeta(Board& b, int depth, int alpha, int beta) {
         for (int i = 0; i < moves.count; ++i) {
             Move move = moves.moves[i];
             {
-                ScopedMoveV2 sm(b, move);
+                ScopedMoveV3 sm(b, move);
                 int eval = alphabeta(b, depth - 1, alpha, beta);
                 max_eval = std::max(max_eval, eval);
                 alpha = std::max(alpha, eval);
@@ -302,7 +438,7 @@ int EngineV2::alphabeta(Board& b, int depth, int alpha, int beta) {
         for (int i = 0; i < moves.count; ++i) {
             Move move = moves.moves[i];
             {
-                ScopedMoveV2 sm(b, move);
+                ScopedMoveV3 sm(b, move);
                 int eval = alphabeta(b, depth - 1, alpha, beta);
                 min_eval = std::min(min_eval, eval);
                 beta = std::min(beta, eval);
@@ -313,7 +449,7 @@ int EngineV2::alphabeta(Board& b, int depth, int alpha, int beta) {
     }
 }
 
-Move EngineV2::search(Board& b, double time_limit) {
+Move EngineV3::search(Board& b, double time_limit) {
     start_time = steady_clock::now();
     time_limit_sec = time_limit;
     nodes_visited = 0;
@@ -366,7 +502,7 @@ Move EngineV2::search(Board& b, double time_limit) {
                     Move move = moves.moves[i];
                     int score;
                     {
-                        ScopedMoveV2 sm(b, move);
+                        ScopedMoveV3 sm(b, move);
                         score = alphabeta(b, depth - 1, alpha, beta);
                     }
                     
@@ -384,7 +520,7 @@ Move EngineV2::search(Board& b, double time_limit) {
                     Move move = moves.moves[i];
                     int score;
                     {
-                        ScopedMoveV2 sm(b, move);
+                        ScopedMoveV3 sm(b, move);
                         score = alphabeta(b, depth - 1, alpha, beta);
                     }
                     
@@ -407,5 +543,27 @@ Move EngineV2::search(Board& b, double time_limit) {
         }
     }
     
+    if (DEBUG_EVAL_V3 && !(best_move.from == 0 && best_move.to == 0)) {
+        EvalComponents before, after;
+        evaluate(b, &before);
+        {
+            ScopedMoveV3 sm(b, best_move);
+            evaluate(b, &after);
+        }
+        EvalComponents delta = b.side_to_move() == WHITE ? (after - before) : (before - after);
+        
+        std::cout << "[DEBUG] Move format chosen: from sq " << best_move.from << " to sq " << best_move.to << std::endl;
+        std::cout << "[DEBUG] Components gained (+ means good for us): "
+                  << "Total=" << delta.final_total << ", "
+                  << "Mat=" << delta.mg_mat << ", "
+                  << "Baby=" << delta.mg_pst_baby << "/" << delta.eg_pst_baby << ", "
+                  << "Center=" << delta.mg_pst_center << ", "
+                  << "Prince=" << delta.mg_pst_prince << ", "
+                  << "Tropism=" << delta.eg_tropism << ", "
+                  << "OurPrinceMob=" << (b.side_to_move() == WHITE ? delta.w_prince_mobility_score : delta.b_prince_mobility_score) << ", "
+                  << "EnemyPrinceMob=" << (b.side_to_move() == WHITE ? delta.b_prince_mobility_score : delta.w_prince_mobility_score)
+                  << " | Phase=" << after.phase << "/" << MAX_PHASE << std::endl;
+    }
+
     return best_move;
 }
