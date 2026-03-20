@@ -4,41 +4,6 @@
 #include "board.h"
 #include <chrono>
 
-struct EvalComponents {
-    int mg_mat = 0, eg_mat = 0;
-    int mg_pst_baby = 0, eg_pst_baby = 0;
-    int mg_pst_prince = 0, eg_pst_prince = 0;
-    int mg_pst_center = 0, eg_pst_center = 0;
-    int eg_tropism = 0;
-    int w_prince_mobility_score = 0;
-    int b_prince_mobility_score = 0;
-    int phase = 0;
-    int mg_total = 0;
-    int eg_total = 0;
-    int final_total = 0;
-
-    EvalComponents operator-(const EvalComponents& other) const {
-        EvalComponents d;
-        d.mg_mat = mg_mat - other.mg_mat;
-        d.eg_mat = eg_mat - other.eg_mat;
-        d.mg_pst_baby = mg_pst_baby - other.mg_pst_baby;
-        d.eg_pst_baby = eg_pst_baby - other.eg_pst_baby;
-        d.mg_pst_prince = mg_pst_prince - other.mg_pst_prince;
-        d.eg_pst_prince = eg_pst_prince - other.eg_pst_prince;
-        d.mg_pst_center = mg_pst_center - other.mg_pst_center;
-        d.eg_pst_center = eg_pst_center - other.eg_pst_center;
-        d.eg_tropism = eg_tropism - other.eg_tropism;
-        d.w_prince_mobility_score = w_prince_mobility_score - other.w_prince_mobility_score;
-        d.b_prince_mobility_score = b_prince_mobility_score - other.b_prince_mobility_score;
-        d.phase = phase;
-        d.mg_total = mg_total - other.mg_total;
-        d.eg_total = eg_total - other.eg_total;
-        d.final_total = final_total - other.final_total;
-        return d;
-    }
-};
-
-extern bool DEBUG_EVAL_V3;
 
 class EngineV3 {
 public:
@@ -50,16 +15,28 @@ public:
     long long get_nodes_visited() const;
     int get_max_depth() const;
     
+    // Set custom piece values
+    void set_piece_values(const int values[9]);
+    
 private:
+    int piece_values[9];
+
     // Alpha-Beta search
-    int alphabeta(Board& b, int depth, int alpha, int beta);
+    int alphabeta(Board& b, int depth, int alpha, int beta, int ply);
+    
+    // Helper for move sorting
+    void score_and_sort_moves(MoveList& moves, const Board& b, int ply);
     
     // Evaluation function
-    int evaluate(const Board& b, EvalComponents* debug_info = nullptr);
+    int evaluate(const Board& b);
     
     // Helper to check time
     bool is_time_up();
     
+    static const int MAX_PLY = 128; // slightly over 100 for safety
+    Move killer_moves[MAX_PLY][2];
+    int history_table[2][256][256]; // 256 size correctly maps to 16x16 coordinates directly
+
     std::chrono::time_point<std::chrono::steady_clock> start_time;
     double time_limit_sec;
 

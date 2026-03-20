@@ -7,11 +7,8 @@
 
 using namespace std::chrono;
 
-extern bool DEBUG_EVAL_V3;
-bool DEBUG_EVAL_V3 = false;
-
 // VERSION 3 Engine
-EngineV3::EngineV3() : nodes_visited(0), last_depth(0) {}
+
 
 long long EngineV3::get_nodes_visited() const { return nodes_visited; }
 int EngineV3::get_max_depth() const { return last_depth; }
@@ -33,6 +30,19 @@ namespace EvalConstants {
         VAL_GUARD, VAL_TUTOR, VAL_SCOUT, VAL_SIBLING
     };
 }
+
+EngineV3::EngineV3() : nodes_visited(0), last_depth(0) {
+    for (int i = 0; i < 9; ++i) {
+        piece_values[i] = EvalConstants::PIECE_VALUES[i];
+    }
+}
+
+void EngineV3::set_piece_values(const int values[9]) {
+    for (int i = 0; i < 9; ++i) {
+        piece_values[i] = values[i];
+    }
+}
+
 
 inline int to_12x12(int sq) {
     int r = sq >> 4;
@@ -70,12 +80,12 @@ const int PST_BABY[144] = {
 
 // Prince: Wants to stay safe in the back/mid-back, avoid edges where it can be trapped
 const int PST_PRINCE[144] = {
-    -10, -10,  10,  20,  20,  15,  15,  20,  20,  10, -10, -10, // Rank 0 (Home)
-    -10, -10,   5,   5,   5,   5,   5,   5,   5,   5, -10, -10, // Rank 1
-    -20, -10,   0,   0,   0,   0,   0,   0,   0, -10, -10, -20, // Rank 2
-    -30, -20, -10, -10, -10, -10, -10, -10, -10, -20, -20, -30, // Rank 3
-    -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, // Don't go forward
-    -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
+    10,   10,  10,  20,  20,  20,  20,  20,  20,  20,  10,  10, // Rank 0 (Home)
+     5,    5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5, // Rank 1
+    -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, // Rank 2
+    -20, -20, -10, -10, -10, -10, -10, -10, -10, -20, -20, -20, // Rank 3
+    -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, // Don't go forward
+    -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
     -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
     -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
     -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
@@ -85,22 +95,20 @@ const int PST_PRINCE[144] = {
 };
 
 // Scout: Wants the center and forward positions to fork pieces
-/*
 const int PST_SCOUT[144] = {
-    -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
       0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-      5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,
-      5,   5,  10,  20,  20,  20,  20,  20,  10,   5,   5,   5,
-      5,   5,  10,  25,  30,  30,  30,  25,  10,   5,   5,   5,
-      5,   5,  10,  30,  40,  40,  40,  30,  10,   5,   5,   5,
-      5,   5,  10,  30,  40,  40,  40,  30,  10,   5,   5,   5,
-      5,   5,  10,  25,  30,  30,  30,  25,  10,   5,   5,   5,
-      5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,
       0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-    -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, // Too deep, might get trapped
-    -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10
+      0,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   0,
+      0,   10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  0,
+      0,   10,  10,  10,  10,  10,  10,  10,  10,  10,  10,   0,
+      0,   10,  10,  10,  10,  10,  10,  10,  10,  10,  10,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 };
-*/
 
 // Generic Centrality Table (for Guard, Tutor, Princess, Pony, Sibling)
 const int PST_CENTER[144] = {
@@ -151,18 +159,18 @@ const int PST_BABY_EG[144] = {
 };
 
 const int PST_PRINCE_EG[144] = {
-    -50, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -50,
-    -30, -10,   0,   0,   0,   0,   0,   0,   0,   0, -10, -30,
-    -30,   0,  10,  10,  10,  10,  10,  10,  10,  10,   0, -30,
-    -30,   0,  10,  20,  20,  20,  20,  20,  20,  10,   0, -30,
-    -30,   0,  10,  20,  30,  30,  30,  30,  20,  10,   0, -30,
-    -30,   0,  10,  20,  30,  40,  40,  30,  20,  10,   0, -30,
-    -30,   0,  10,  20,  30,  40,  40,  30,  20,  10,   0, -30,
-    -30,   0,  10,  20,  30,  30,  30,  30,  20,  10,   0, -30,
-    -30,   0,  10,  20,  20,  20,  20,  20,  20,  10,   0, -30,
-    -30,   0,  10,  10,  10,  10,  10,  10,  10,  10,   0, -30,
-    -30, -10,   0,   0,   0,   0,   0,   0,   0,   0, -10, -30,
-    -50, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -50
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 const int PST_CENTER_EG[144] = {
@@ -180,7 +188,7 @@ const int PST_CENTER_EG[144] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-int EngineV3::evaluate(const Board& b, EvalComponents* debug_info) {
+int EngineV3::evaluate(const Board& b) {
     int mg_score = 0; // Middlegame score
     int eg_score = 0; // Endgame score
     int game_phase = 0;
@@ -204,12 +212,6 @@ int EngineV3::evaluate(const Board& b, EvalComponents* debug_info) {
         if (b.piece_at(b.get_black_pieces()[i]) == PRINCE) black_prince_sq = b.get_black_pieces()[i];
     }
 
-    int mg_mat = 0, eg_mat = 0;
-    int mg_pst_baby = 0, eg_pst_baby = 0;
-    int mg_pst_prince = 0, eg_pst_prince = 0;
-    int mg_pst_center = 0, eg_pst_center = 0;
-    int eg_tropism = 0;
-
     // 1. MATERIAL & POSITION
     auto eval_list = [&](const int* list, int count, Color c, int enemy_prince_sq) {
         int mg = 0;
@@ -217,39 +219,57 @@ int EngineV3::evaluate(const Board& b, EvalComponents* debug_info) {
         for (int i = 0; i < count; ++i) {
             int sq = list[i];
             PieceType p = b.piece_at(sq);
-            int val = EvalConstants::PIECE_VALUES[p];
+            int val = piece_values[p];
             int mg_pos_bonus = 0;
             int eg_pos_bonus = 0;
 
             int pst_sq = to_12x12(sq);
             int pst_idx = (c == WHITE) ? pst_sq : mirror_sq(pst_sq);
 
-            int t_mg_pst_baby = 0, t_eg_pst_baby = 0;
-            int t_mg_pst_prince = 0, t_eg_pst_prince = 0;
-            int t_mg_pst_center = 0, t_eg_pst_center = 0;
-
             switch (p) {
                 case BABY:
                     mg_pos_bonus = PST_BABY[pst_idx];
                     eg_pos_bonus = PST_BABY_EG[pst_idx];
-                    t_mg_pst_baby = mg_pos_bonus;
-                    t_eg_pst_baby = eg_pos_bonus;
+                    {
+                        int rank = pst_idx / 12;
+                        if (rank == 11) { mg_pos_bonus -= 100; eg_pos_bonus -= 100; }
+                        else if (rank == 10) { mg_pos_bonus -= 90; eg_pos_bonus -= 90; }
+                        else if (rank == 9) { mg_pos_bonus -= 50; eg_pos_bonus -= 50; }
+                        else if (rank == 8) { mg_pos_bonus -= 20; eg_pos_bonus -= 20; }
+                        
+                        // Penalty if friendly non-baby piece is blocking it
+                        int forward_sq = (c == WHITE) ? (sq + 16) : (sq - 16);
+                        int fr = forward_sq >> 4;
+                        int fc = forward_sq & 15;
+                        if (fr >= 0 && fr < 12 && fc >= 0 && fc < 12) {
+                            if (b.color_at(forward_sq) == c && b.piece_at(forward_sq) != BABY) {
+                                mg_pos_bonus -= 40; // Penalty for blocked baby
+                                eg_pos_bonus -= 40;
+                            }
+                        }
+                    }
+                    break;
+                case SCOUT:
+                    mg_pos_bonus = PST_CENTER[pst_idx]; 
+                    eg_pos_bonus = PST_CENTER_EG[pst_idx];
+                    {
+                        int rank = pst_idx / 12;
+                        if (rank >= 7) {
+                            int penalty = (rank - 6) * 120; // rank 7: -120 -> rank 11: -600 (Scout value is 600)
+                            mg_pos_bonus -= penalty;
+                            eg_pos_bonus -= penalty;
+                        }
+                    }
                     break;
                 case PRINCE:    
                     mg_pos_bonus = PST_PRINCE[pst_idx]; 
                     eg_pos_bonus = PST_PRINCE_EG[pst_idx];
-                    t_mg_pst_prince = mg_pos_bonus;
-                    t_eg_pst_prince = eg_pos_bonus;
                     break;
                 default:
                     mg_pos_bonus = PST_CENTER[pst_idx]; 
                     eg_pos_bonus = PST_CENTER_EG[pst_idx];
-                    t_mg_pst_center = mg_pos_bonus;
-                    t_eg_pst_center = eg_pos_bonus;
                     break; 
             }
-
-            int t_tropism = 0;
             // Tropism: pieces should tend toward enemy prince in endgame
             if (p != PRINCE && enemy_prince_sq != -1) {
                 int r1 = (sq >> 4) & 15;
@@ -259,24 +279,7 @@ int EngineV3::evaluate(const Board& b, EvalComponents* debug_info) {
                 int dist = std::abs(r1 - r2) + std::abs(c1 - c2);
                 
                 // Reward closeness
-                t_tropism = std::max(0, (24 - dist) * 2);
-                eg_pos_bonus += t_tropism;
-            }
-
-            if (debug_info) {
-                if (c == WHITE) {
-                    mg_mat += val; eg_mat += val;
-                    mg_pst_baby += t_mg_pst_baby; eg_pst_baby += t_eg_pst_baby;
-                    mg_pst_prince += t_mg_pst_prince; eg_pst_prince += t_eg_pst_prince;
-                    mg_pst_center += t_mg_pst_center; eg_pst_center += t_eg_pst_center;
-                    eg_tropism += t_tropism;
-                } else {
-                    mg_mat -= val; eg_mat -= val;
-                    mg_pst_baby -= t_mg_pst_baby; eg_pst_baby -= t_eg_pst_baby;
-                    mg_pst_prince -= t_mg_pst_prince; eg_pst_prince -= t_eg_pst_prince;
-                    mg_pst_center -= t_mg_pst_center; eg_pst_center -= t_eg_pst_center;
-                    eg_tropism -= t_tropism;
-                }
+                eg_pos_bonus += std::max(0, (24 - dist) * 2);
             }
 
             mg += (val + mg_pos_bonus);
@@ -323,24 +326,6 @@ int EngineV3::evaluate(const Board& b, EvalComponents* debug_info) {
     int phase = std::min(game_phase, MAX_PHASE);
     int final_score = (mg_score * phase + eg_score * (MAX_PHASE - phase)) / MAX_PHASE;
 
-    if (debug_info) {
-        debug_info->mg_mat = mg_mat;
-        debug_info->eg_mat = eg_mat;
-        debug_info->mg_pst_baby = mg_pst_baby;
-        debug_info->eg_pst_baby = eg_pst_baby;
-        debug_info->mg_pst_prince = mg_pst_prince;
-        debug_info->eg_pst_prince = eg_pst_prince;
-        debug_info->mg_pst_center = mg_pst_center;
-        debug_info->eg_pst_center = eg_pst_center;
-        debug_info->eg_tropism = eg_tropism;
-        debug_info->w_prince_mobility_score = w_prince_moves * 10;
-        debug_info->b_prince_mobility_score = -(b_prince_moves * 10);
-        debug_info->phase = phase;
-        debug_info->mg_total = mg_score;
-        debug_info->eg_total = eg_score;
-        debug_info->final_total = final_score;
-    }
-
     return final_score;
 }
 
@@ -362,8 +347,47 @@ struct ScopedMoveV3 {
     }
 };
 
+void EngineV3::score_and_sort_moves(MoveList& moves, const Board& b, int ply) {
+    if (moves.count == 0) return;
+    
+    std::vector<int> move_scores(moves.count, 0);
+    Color side = b.side_to_move();
+    
+    for (int i = 0; i < moves.count; ++i) {
+        Move m = moves.moves[i];
+        if (m.captured != NO_PIECE) {
+            // Band 1: Captures get a massive score boost so they are searched first
+            PieceType attacker = b.piece_at(m.from);
+            move_scores[i] = 1000000 + (piece_values[m.captured] * 10) - piece_values[attacker];
+        } else {
+            // Quiet moves
+            if (ply < MAX_PLY && m == killer_moves[ply][0]) {
+                move_scores[i] = 900000;
+            } else if (ply < MAX_PLY && m == killer_moves[ply][1]) {
+                move_scores[i] = 800000;
+            } else {
+                int hist = history_table[side][m.from][m.to];
+                if (hist > 690000) hist = 690000; // Cap safely
+                move_scores[i] = hist;
+            }
+        }
+    }
+
+    // Sort moves based on scores (Descending)
+    for (int i = 0; i < moves.count - 1; ++i) {
+        int best_idx = i;
+        for (int j = i + 1; j < moves.count; ++j) {
+            if (move_scores[j] > move_scores[best_idx]) {
+                best_idx = j;
+            }
+        }
+        std::swap(move_scores[i], move_scores[best_idx]);
+        std::swap(moves.moves[i], moves.moves[best_idx]);
+    }
+}
+
 // Alpha-Beta Search
-int EngineV3::alphabeta(Board& b, int depth, int alpha, int beta) {
+int EngineV3::alphabeta(Board& b, int depth, int alpha, int beta, int ply) {
     nodes_visited++;
     
     // Check for draw by repetition or 50-move rule
@@ -394,31 +418,8 @@ int EngineV3::alphabeta(Board& b, int depth, int alpha, int beta) {
         return 0; // Draw
     }
     
-    // Move ordering: MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
-    std::vector<int> move_scores(moves.count, 0);
-    for (int i = 0; i < moves.count; ++i) {
-        PieceType captured = moves.moves[i].captured;
-        if (captured != NO_PIECE) {
-            PieceType attacker = b.piece_at(moves.moves[i].from);
-            // Captures get a massive score boost so they are searched first
-            move_scores[i] = 1000000 + (EvalConstants::PIECE_VALUES[captured] * 10) - EvalConstants::PIECE_VALUES[attacker];
-        } else {
-            // Quiet moves (non-captures) get a score of 0 for now
-            move_scores[i] = 0;
-        }
-    }
-
-    // Sort moves based on scores (Descending)
-    for (int i = 0; i < moves.count - 1; ++i) {
-        int best_idx = i;
-        for (int j = i + 1; j < moves.count; ++j) {
-            if (move_scores[j] > move_scores[best_idx]) {
-                best_idx = j;
-            }
-        }
-        std::swap(move_scores[i], move_scores[best_idx]);
-        std::swap(moves.moves[i], moves.moves[best_idx]);
-    }
+    // Move ordering
+    score_and_sort_moves(moves, b, ply);
     
     if (side == WHITE) { // Maximize
         int max_eval = -2000000;
@@ -426,11 +427,20 @@ int EngineV3::alphabeta(Board& b, int depth, int alpha, int beta) {
             Move move = moves.moves[i];
             {
                 ScopedMoveV3 sm(b, move);
-                int eval = alphabeta(b, depth - 1, alpha, beta);
+                int eval = alphabeta(b, depth - 1, alpha, beta, ply + 1);
                 max_eval = std::max(max_eval, eval);
                 alpha = std::max(alpha, eval);
             }
-             if (beta <= alpha) break; // Beta Cutoff
+             if (beta <= alpha) {
+                 if (move.captured == NO_PIECE) {
+                     history_table[WHITE][move.from][move.to] += depth * depth;
+                     if (ply < MAX_PLY && !(killer_moves[ply][0] == move)) {
+                         killer_moves[ply][1] = killer_moves[ply][0];
+                         killer_moves[ply][0] = move;
+                     }
+                 }
+                 break; // Beta Cutoff
+             }
         }
         return max_eval;
     } else { // Minimize
@@ -439,11 +449,20 @@ int EngineV3::alphabeta(Board& b, int depth, int alpha, int beta) {
             Move move = moves.moves[i];
             {
                 ScopedMoveV3 sm(b, move);
-                int eval = alphabeta(b, depth - 1, alpha, beta);
+                int eval = alphabeta(b, depth - 1, alpha, beta, ply + 1);
                 min_eval = std::min(min_eval, eval);
                 beta = std::min(beta, eval);
             }
-             if (beta <= alpha) break; // Alpha Cutoff
+             if (beta <= alpha) {
+                 if (move.captured == NO_PIECE) {
+                     history_table[BLACK][move.from][move.to] += depth * depth;
+                     if (ply < MAX_PLY && !(killer_moves[ply][0] == move)) {
+                         killer_moves[ply][1] = killer_moves[ply][0];
+                         killer_moves[ply][0] = move;
+                     }
+                 }
+                 break; // Alpha Cutoff
+             }
         }
         return min_eval;
     }
@@ -454,6 +473,21 @@ Move EngineV3::search(Board& b, double time_limit) {
     time_limit_sec = time_limit;
     nodes_visited = 0;
     last_depth = 0;
+    
+    // Clear killers array for this search
+    for (int p = 0; p < MAX_PLY; ++p) {
+        killer_moves[p][0] = Move();
+        killer_moves[p][1] = Move();
+    }
+    
+    // Decay history roughly by half over time
+    for (int c = 0; c < 2; ++c) {
+        for (int f = 0; f < 256; ++f) {
+            for (int t = 0; t < 256; ++t) {
+                history_table[c][f][t] /= 2;
+            }
+        }
+    }
     
     Move best_move;
     int max_depth = 100; 
@@ -467,29 +501,8 @@ Move EngineV3::search(Board& b, double time_limit) {
             
             if (moves.count == 0) return Move();
             
-            // Move ordering: MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
-            std::vector<int> move_scores(moves.count, 0);
-            for (int i = 0; i < moves.count; ++i) {
-                PieceType captured = moves.moves[i].captured;
-                if (captured != NO_PIECE) {
-                    PieceType attacker = b.piece_at(moves.moves[i].from);
-                    move_scores[i] = 1000000 + (EvalConstants::PIECE_VALUES[captured] * 10) - EvalConstants::PIECE_VALUES[attacker];
-                } else {
-                    move_scores[i] = 0;
-                }
-            }
-
-            // Sort moves based on scores (Descending)
-            for (int i = 0; i < moves.count - 1; ++i) {
-                int best_idx = i;
-                for (int j = i + 1; j < moves.count; ++j) {
-                    if (move_scores[j] > move_scores[best_idx]) {
-                        best_idx = j;
-                    }
-                }
-                std::swap(move_scores[i], move_scores[best_idx]);
-                std::swap(moves.moves[i], moves.moves[best_idx]);
-            }
+            // Move ordering
+            score_and_sort_moves(moves, b, 0); // Root is ply 0
 
             Move current_best_move;
             int best_score;
@@ -503,7 +516,7 @@ Move EngineV3::search(Board& b, double time_limit) {
                     int score;
                     {
                         ScopedMoveV3 sm(b, move);
-                        score = alphabeta(b, depth - 1, alpha, beta);
+                        score = alphabeta(b, depth - 1, alpha, beta, 1);
                     }
                     
                     if (score > best_score) {
@@ -521,7 +534,7 @@ Move EngineV3::search(Board& b, double time_limit) {
                     int score;
                     {
                         ScopedMoveV3 sm(b, move);
-                        score = alphabeta(b, depth - 1, alpha, beta);
+                        score = alphabeta(b, depth - 1, alpha, beta, 1);
                     }
                     
                     if (score < best_score) {
@@ -543,27 +556,5 @@ Move EngineV3::search(Board& b, double time_limit) {
         }
     }
     
-    if (DEBUG_EVAL_V3 && !(best_move.from == 0 && best_move.to == 0)) {
-        EvalComponents before, after;
-        evaluate(b, &before);
-        {
-            ScopedMoveV3 sm(b, best_move);
-            evaluate(b, &after);
-        }
-        EvalComponents delta = b.side_to_move() == WHITE ? (after - before) : (before - after);
-        
-        std::cout << "[DEBUG] Move format chosen: from sq " << best_move.from << " to sq " << best_move.to << std::endl;
-        std::cout << "[DEBUG] Components gained (+ means good for us): "
-                  << "Total=" << delta.final_total << ", "
-                  << "Mat=" << delta.mg_mat << ", "
-                  << "Baby=" << delta.mg_pst_baby << "/" << delta.eg_pst_baby << ", "
-                  << "Center=" << delta.mg_pst_center << ", "
-                  << "Prince=" << delta.mg_pst_prince << ", "
-                  << "Tropism=" << delta.eg_tropism << ", "
-                  << "OurPrinceMob=" << (b.side_to_move() == WHITE ? delta.w_prince_mobility_score : delta.b_prince_mobility_score) << ", "
-                  << "EnemyPrinceMob=" << (b.side_to_move() == WHITE ? delta.b_prince_mobility_score : delta.w_prince_mobility_score)
-                  << " | Phase=" << after.phase << "/" << MAX_PHASE << std::endl;
-    }
-
     return best_move;
 }

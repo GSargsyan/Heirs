@@ -33,8 +33,8 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 0.5;
-const double TIME_TO_THINK_BLACK = 0.5;
+const double TIME_TO_THINK_WHITE = 5;
+const double TIME_TO_THINK_BLACK = 1;
 
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
