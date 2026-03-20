@@ -86,76 +86,87 @@ int main() {
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
 #endif
-    std::string val_file = "../piece_values.txt";
-    int base_values[9];
-    if (!load_values(val_file, base_values)) {
-        val_file = "piece_values.txt";
-        if (!load_values(val_file, base_values)) {
-            std::cerr << "Could not load piece_values.txt. Run from cli/ or project root." << std::endl;
-            return 1;
-        }
-    }
-    
-    int tweaked_values[9];
-    randomize_values(base_values, tweaked_values);
-    
-    std::cout << "Base:    ";
-    for (int i=1; i<9; i++) std::cout << base_values[i] << " ";
-    std::cout << "\nTweaked: ";
-    for (int i=1; i<9; i++) std::cout << tweaked_values[i] << " ";
-    std::cout << "\n\nPlaying " << MATCHES_PER_ITER << " games...\n";
-    
-    int score_tweaked = 0;
-    int score_base = 0;
-    int draws = 0;
-    
-    for (int i = 0; i < MATCHES_PER_ITER; ++i) {
-        EngineV3 base_engine;
-        base_engine.set_piece_values(base_values);
-        
-        EngineV3 tweaked_engine;
-        tweaked_engine.set_piece_values(tweaked_values);
-        
-        int res = 0;
-        int moves = 0;
-        if (i % 2 == 0) {
-            // Tweaked as White (p1), Base as Black (p2)
-            auto result = play_game(tweaked_engine, base_engine);
-            res = result.first;
-            moves = result.second;
-            if (res == 1) score_tweaked++;
-            else if (res == -1) score_base++;
-            else draws++;
-            std::cout << "Game " << (i+1) << ": Tweaked (White) vs Base (Black) | Result: " 
-                      << (res == 1 ? "Tweaked Win" : (res == -1 ? "Base Win" : "Draw")) 
-                      << " | Moves: " << moves << "\n";
-        } else {
-            // Base as White (p1), Tweaked as Black (p2)
-            auto result = play_game(base_engine, tweaked_engine);
-            res = result.first;
-            moves = result.second;
-            if (res == -1) score_tweaked++;
-            else if (res == 1) score_base++;
-            else draws++;
-            std::cout << "Game " << (i+1) << ": Base (White) vs Tweaked (Black) | Result: " 
-                      << (res == -1 ? "Tweaked Win" : (res == 1 ? "Base Win" : "Draw")) 
-                      << " | Moves: " << moves << "\n";
-        }
-    }
-    
-    std::cout << "\nResults: Tweaked won " << score_tweaked << " | Base won " << score_base << " | Draws " << draws << "\n";
-    
-    // Calculate win rate for Tweaked: (wins + 0.5 * draws) / total matches
-    double win_rate = static_cast<double>(score_tweaked + 0.5 * draws) / MATCHES_PER_ITER;
-    std::cout << "Tweaked Win Rate: " << win_rate * 100.0 << "% (Required: " << ACCEPT_THRESHOLD * 100.0 << "%)\n";
+    std::string val_file = "../piece_values.txt"; // Search root directory first
+    int iteration = 1;
 
-    // Threshold: Tweaked score must meet the acceptance threshold
-    if (win_rate >= ACCEPT_THRESHOLD) {
-        std::cout << "Tweaked values accepted! Updating " << val_file << "\n";
-        save_values(val_file, tweaked_values);
-    } else {
-        std::cout << "Tweaked values rejected.\n";
-    }
+    // INFINITE LOOP: Run until manually stopped (Ctrl+C)
+    while (true) {
+        std::cout << "\n======================================\n";
+        std::cout << "===  STARTING TUNING ITERATION " << iteration << "   ===\n";
+        std::cout << "======================================\n";
+
+        int base_values[9];
+        if (!load_values(val_file, base_values)) {
+            val_file = "piece_values.txt";
+            if (!load_values(val_file, base_values)) {
+                std::cerr << "Could not load piece_values.txt. Missing?" << std::endl;
+                return 1;
+            }
+        }
+        
+        int tweaked_values[9];
+        randomize_values(base_values, tweaked_values);
+        
+        std::cout << "Base:    ";
+        for (int i=1; i<9; i++) std::cout << base_values[i] << " ";
+        std::cout << "\nTweaked: ";
+        for (int i=1; i<9; i++) std::cout << tweaked_values[i] << " ";
+        std::cout << "\n\nPlaying " << MATCHES_PER_ITER << " games...\n";
+        
+        int score_tweaked = 0;
+        int score_base = 0;
+        int draws = 0;
+        
+        for (int i = 0; i < MATCHES_PER_ITER; ++i) {
+            EngineV3 base_engine;
+            base_engine.set_piece_values(base_values);
+            
+            EngineV3 tweaked_engine;
+            tweaked_engine.set_piece_values(tweaked_values);
+            
+            int res = 0;
+            int moves = 0;
+            if (i % 2 == 0) {
+                // Tweaked as White (p1), Base as Black (p2)
+                auto result = play_game(tweaked_engine, base_engine);
+                res = result.first;
+                moves = result.second;
+                if (res == 1) score_tweaked++;
+                else if (res == -1) score_base++;
+                else draws++;
+                std::cout << "Game " << (i+1) << ": Tweaked (White) vs Base (Black) | Result: " 
+                          << (res == 1 ? "Tweaked Win" : (res == -1 ? "Base Win" : "Draw")) 
+                          << " | Moves: " << moves << "\n";
+            } else {
+                // Base as White (p1), Tweaked as Black (p2)
+                auto result = play_game(base_engine, tweaked_engine);
+                res = result.first;
+                moves = result.second;
+                if (res == -1) score_tweaked++;
+                else if (res == 1) score_base++;
+                else draws++;
+                std::cout << "Game " << (i+1) << ": Base (White) vs Tweaked (Black) | Result: " 
+                          << (res == -1 ? "Tweaked Win" : (res == 1 ? "Base Win" : "Draw")) 
+                          << " | Moves: " << moves << "\n";
+            }
+        }
+        
+        std::cout << "\nResults: Tweaked won " << score_tweaked << " | Base won " << score_base << " | Draws " << draws << "\n";
+        
+        // Calculate win rate for Tweaked: (wins + 0.5 * draws) / total matches
+        double win_rate = static_cast<double>(score_tweaked + 0.5 * draws) / MATCHES_PER_ITER;
+        std::cout << "Tweaked Win Rate: " << win_rate * 100.0 << "% (Required: " << ACCEPT_THRESHOLD * 100.0 << "%)\n";
+
+        // Threshold: Tweaked score must meet the acceptance threshold
+        if (win_rate >= ACCEPT_THRESHOLD) {
+            std::cout << "Tweaked values accepted! Updating " << val_file << " for next iteration!\n";
+            save_values(val_file, tweaked_values);
+        } else {
+            std::cout << "Tweaked values rejected.\n";
+        }
+        
+        iteration++;
+    } // End of infinite while loop
     
     return 0;
 }
