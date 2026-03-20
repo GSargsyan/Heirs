@@ -7,28 +7,23 @@
 
 using namespace std::chrono;
 
+#include "eval_constants.h"
+
 // VERSION 1 Engine
-EngineV1::EngineV1() : nodes_visited(0), last_depth(0) {}
 
 long long EngineV1::get_nodes_visited() const { return nodes_visited; }
 int EngineV1::get_max_depth() const { return last_depth; }
 
-// Heirs Constants for Evaluation
-namespace EvalConstants {
-    // Adjusted values based on 12x12 board dynamics
-    const int VAL_BABY = 100;
-    const int VAL_PRINCE = 20000;
-    const int VAL_PRINCESS = 950;
-    const int VAL_PONY = 180;    // Slightly higher: they are weak, but useful for shielding
-    const int VAL_GUARD = 350;   // Good defenders
-    const int VAL_TUTOR = 325;
-    const int VAL_SCOUT = 600;   // The most dangerous piece after Princess due to range
-    const int VAL_SIBLING = 280; // Needs to stick together
+EngineV1::EngineV1() : nodes_visited(0), last_depth(0) {
+    for (int i = 0; i < 9; ++i) {
+        piece_values[i] = EvalConstants::PIECE_VALUES[i];
+    }
+}
 
-    const int PIECE_VALUES[] = {
-        0, VAL_BABY, VAL_PRINCE, VAL_PRINCESS, VAL_PONY, 
-        VAL_GUARD, VAL_TUTOR, VAL_SCOUT, VAL_SIBLING
-    };
+void EngineV1::set_piece_values(const int values[9]) {
+    for (int i = 0; i < 9; ++i) {
+        piece_values[i] = values[i];
+    }
 }
 
 inline int to_12x12(int sq) {
@@ -45,165 +40,128 @@ inline int mirror_sq(int sq) {
     return (11 - r) * 12 + c;
 }
 
-// PIECE SQUARE TABLES (Linearized 12x12)
-// Defined from WHITE's perspective (bottom to top)
-// High values = Good square.
-
-// Baby: Wants to advance to ranks 4-8. Rank 10/11 is useless (0 bonus).
-const int PST_BABY[144] = {
-     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // Rank 0 (Invalid for babies usually)
-     5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5, // Rank 1
-    10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, // Rank 2
-    15, 15, 20, 25, 25, 25, 25, 25, 20, 15, 15, 15, // Rank 3
-    20, 20, 25, 30, 35, 35, 35, 35, 30, 25, 20, 20, // Rank 4
-    25, 25, 30, 40, 45, 45, 45, 45, 40, 30, 25, 25, // Rank 5
-    25, 25, 30, 40, 45, 45, 45, 45, 40, 30, 25, 25, // Rank 6
-    20, 20, 25, 30, 35, 35, 35, 35, 30, 25, 20, 20, // Rank 7
-    10, 10, 15, 20, 20, 20, 20, 20, 15, 10, 10, 10, // Rank 8
-     0,  0,  0,  5,  5,  5,  5,  5,  0,  0,  0,  0, // Rank 9 (Getting stuck)
-     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, // Rank 10 (Stuck)
-     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0  // Rank 11 (Stuck)
-};
-
-// Prince: Wants to stay safe in the back/mid-back, avoid edges where it can be trapped
-const int PST_PRINCE[144] = {
-    -10, -10,  10,  20,  20,  15,  15,  20,  20,  10, -10, -10, // Rank 0 (Home)
-    -10, -10,   5,   5,   5,   5,   5,   5,   5,   5, -10, -10, // Rank 1
-    -20, -10,   0,   0,   0,   0,   0,   0,   0, -10, -10, -20, // Rank 2
-    -30, -20, -10, -10, -10, -10, -10, -10, -10, -20, -20, -30, // Rank 3
-    -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, // Don't go forward
-    -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-    -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-    -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-    -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-    -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-    -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-    -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50
-};
-
-// Scout: Wants the center and forward positions to fork pieces
-const int PST_SCOUT[144] = {
-    -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
-      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-      5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,
-      5,   5,  10,  20,  20,  20,  20,  20,  10,   5,   5,   5,
-      5,   5,  10,  25,  30,  30,  30,  25,  10,   5,   5,   5,
-      5,   5,  10,  30,  40,  40,  40,  30,  10,   5,   5,   5,
-      5,   5,  10,  30,  40,  40,  40,  30,  10,   5,   5,   5,
-      5,   5,  10,  25,  30,  30,  30,  25,  10,   5,   5,   5,
-      5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,
-      0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-    -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, // Too deep, might get trapped
-    -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10
-};
-
-// Generic Centrality Table (for Guard, Tutor, Princess, Pony, Sibling)
-const int PST_CENTER[144] = {
-    -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
-    -10,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -10,
-    -10,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -10,
-    -10,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -10,
-    -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
-    -10,   0,   5,  10,  20,  30,  30,  20,  10,   5,   0, -10,
-    -10,   0,   5,  10,  20,  30,  30,  20,  10,   5,   0, -10,
-    -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
-    -10,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -10,
-    -10,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -10,
-    -10,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -10,
-    -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10
-};
-
 int EngineV1::evaluate(const Board& b) {
-    int mg_score = 0; // Middlegame score
-    
-    // We need to detect if we are winning or losing to adjust aggressiveness
-    // But for V1, let's stick to a solid static eval first.
+    int game_phase = b.game_phase;
 
-    int white_prince_sq = -1;
-    int black_prince_sq = -1;
+    int white_prince_sq = b.prince_sq[WHITE];
+    int black_prince_sq = b.prince_sq[BLACK];
 
-    // 1. MATERIAL & POSITION (via PST)
-    auto eval_list = [&](const int* list, int count, Color c) {
-        int mg = 0;
+    // 1. MATERIAL & BASE PST
+    int w_mg = b.pst_mg[WHITE];
+    int w_eg = b.pst_eg[WHITE];
+    int b_mg = b.pst_mg[BLACK];
+    int b_eg = b.pst_eg[BLACK];
+
+    for (int p = 1; p < 10; ++p) {
+        if (p == OFFBOARD) continue;
+        w_mg += b.piece_counts[WHITE][p] * piece_values[p];
+        w_eg += b.piece_counts[WHITE][p] * piece_values[p];
+        b_mg += b.piece_counts[BLACK][p] * piece_values[p];
+        b_eg += b.piece_counts[BLACK][p] * piece_values[p];
+    }
+
+    auto eval_list_dyn = [&](const int* list, int count, Color c, int enemy_prince_sq) {
+        int dyn_mg = 0;
+        int dyn_eg = 0;
         for (int i = 0; i < count; ++i) {
             int sq = list[i];
             PieceType p = b.piece_at(sq);
-            int val = EvalConstants::PIECE_VALUES[p];
-            int pos_bonus = 0;
-
-            // Apply PST based on perspective
             int pst_sq = to_12x12(sq);
             int pst_idx = (c == WHITE) ? pst_sq : mirror_sq(pst_sq);
 
             switch (p) {
-                case BABY:      pos_bonus = PST_BABY[pst_idx]; break;
-                case PRINCE:    
-                    pos_bonus = PST_PRINCE[pst_idx]; 
-                    if (c == WHITE) white_prince_sq = sq; else black_prince_sq = sq;
+                case BABY:
+                    {
+                        int rank = pst_idx / 12;
+                        if (rank == 11) { dyn_mg -= 100; dyn_eg -= 100; }
+                        else if (rank == 10) { dyn_mg -= 90; dyn_eg -= 90; }
+                        else if (rank == 9) { dyn_mg -= 50; dyn_eg -= 50; }
+                        else if (rank == 8) { dyn_mg -= 20; dyn_eg -= 20; }
+                        
+                        // Penalty if friendly non-baby piece is blocking it
+                        int forward_sq = (c == WHITE) ? (sq + 16) : (sq - 16);
+                        int fr = forward_sq >> 4;
+                        int fc = forward_sq & 15;
+                        if (fr >= 0 && fr < 12 && fc >= 0 && fc < 12) {
+                            if (b.color_at(forward_sq) == c && b.piece_at(forward_sq) != BABY) {
+                                dyn_mg -= 40; 
+                                dyn_eg -= 40;
+                            }
+                        }
+                    }
                     break;
-                case SCOUT:     pos_bonus = PST_SCOUT[pst_idx]; break;
-                default:        pos_bonus = PST_CENTER[pst_idx]; break; 
+                case SCOUT:
+                    {
+                        int rank = pst_idx / 12;
+                        if (rank >= 7) {
+                            int penalty = (rank - 6) * 120;
+                            dyn_mg -= penalty;
+                            dyn_eg -= penalty;
+                        }
+                    }
+                    break;
+                default:
+                    break; 
             }
-
-            // Sibling Logic: Bonus for being near friends (any friend)
-            if (p == SIBLING) {
-                // ... (Insert simple adjacency check logic here if available in Board class)
-                // If not, simplify: Sibling likes center (already in PST_CENTER)
+            // Tropism: pieces should tend toward enemy prince in endgame
+            if (p != PRINCE && enemy_prince_sq != -1) {
+                int r1 = (sq >> 4) & 15;
+                int c1 = sq & 15;
+                int r2 = (enemy_prince_sq >> 4) & 15;
+                int c2 = enemy_prince_sq & 15;
+                int dist = std::abs(r1 - r2) + std::abs(c1 - c2);
+                
+                // Reward closeness
+                dyn_eg += std::max(0, (24 - dist) * 2);
             }
-
-            mg += (val + pos_bonus);
         }
-        return mg;
+        return std::make_pair(dyn_mg, dyn_eg);
     };
 
-    mg_score += eval_list(b.get_white_pieces(), b.get_white_piece_count(), WHITE);
-    mg_score -= eval_list(b.get_black_pieces(), b.get_black_piece_count(), BLACK);
+    auto w_dyn = eval_list_dyn(b.get_white_pieces(), b.get_white_piece_count(), WHITE, black_prince_sq);
+    auto b_dyn = eval_list_dyn(b.get_black_pieces(), b.get_black_piece_count(), BLACK, white_prince_sq);
 
-    // 2. MOBILITY (Crucial for 12x12)
-    // We estimate mobility by counting legal moves. 
-    // This is expensive if done fully, so we do a "pseudo-mobility" or rely on the Board's move gen if fast.
-    // If your move generation is slow, skip this or approximate it by counting empty adjacent squares.
+    w_mg += w_dyn.first;
+    w_eg += w_dyn.second;
+    b_mg += b_dyn.first;
+    b_eg += b_dyn.second;
+
+    int mg_score = w_mg - b_mg;
+    int eg_score = w_eg - b_eg;
+
+    // 2. ENEMY PRINCE MOBILITY TROPISM
+    // Higher empty sqcount = more mobility
+    auto count_empty_neighbors = [&](int sq) {
+        if (sq == -1) return 0;
+        int empty_count = 0;
+        int r = (sq >> 4) & 15;
+        int c = sq & 15;
+        int dr[] = {-1, -1, -1, 0, 0, 1, 1, 1};
+        int dc[] = {-1, 0, 1, -1, 1, -1, 0, 1};
+        for (int i = 0; i < 8; ++i) {
+            int nr = r + dr[i];
+            int nc = c + dc[i];
+            if (nr >= 0 && nr < 12 && nc >= 0 && nc < 12) {
+                int nsq = (nr << 4) | nc;
+                if (b.piece_at(nsq) == NO_PIECE) empty_count++;
+            }
+        }
+        return empty_count;
+    };
+
+    int w_prince_moves = count_empty_neighbors(white_prince_sq);
+    int b_prince_moves = count_empty_neighbors(black_prince_sq);
     
-    // Assuming you have a function `b.generate_moves(color)` or similar that is reasonably fast:
-    // If not, implementing a simplified "count empty neighbors" loop is better than nothing.
-    
-    /* 
-    // Pseudo-code for mobility bonus
-    std::vector<Move> white_moves, black_moves;
-    b.get_moves(WHITE, white_moves);
-    b.get_moves(BLACK, black_moves);
-    
-    // Weight mobility: 5 points per move
-    mg_score += (white_moves.size() * 5);
-    mg_score -= (black_moves.size() * 5);
-    */
+    // Less mobility for enemy prince is better for us
+    // So give us points if our prince has more mobility, and penalize if enemy has more mobility.
+    eg_score += w_prince_moves * 10;
+    eg_score -= b_prince_moves * 10;
 
-    // 3. PRINCE SAFETY & ATTACK
-    // Instead of simple distance, check "Attackers in Sector"
-    if (white_prince_sq != -1 && black_prince_sq != -1) {
-        int w_pr_r = white_prince_sq >> 4;
-        int w_pr_c = white_prince_sq & 15;
-        int b_pr_r = black_prince_sq >> 4;
-        int b_pr_c = black_prince_sq & 15;
+    // 3. TAPERED BLEND
+    int phase = std::min(game_phase, EvalConstants::MAX_PHASE);
+    int final_score = (mg_score * phase + eg_score * (EvalConstants::MAX_PHASE - phase)) / EvalConstants::MAX_PHASE;
 
-        // Reward White pieces close to Black Prince (Manhattan dist < 4)
-        // This is safer than the "Global Distance" you used before.
-        // We iterate pieces again? No, too slow. 
-        // Optimization: Do this inside the main loop above.
-        
-        // Re-implementing simplified distance logic:
-        int dist = std::abs(w_pr_r - b_pr_r) + std::abs(w_pr_c - b_pr_c);
-        
-        // As the game progresses (material drops), kings should avoid each other 
-        // unless one has a massive advantage. 
-        // But in Heirs, Prince capture is instant win. 
-        
-        // Aggression Bonus:
-        // Calculate distance between White Scout/Princess and Black Prince.
-        // Give bonus if low.
-    }
-
-    return mg_score;
+    return final_score;
 }
 
 bool EngineV1::is_time_up() {
@@ -224,8 +182,40 @@ struct ScopedMoveV1 {
     }
 };
 
+void EngineV1::score_moves(const MoveList& moves, int* move_scores, const Board& b, int ply) {
+    if (moves.count == 0) return;
+    
+    Color side = b.side_to_move();
+    
+    for (int i = 0; i < moves.count; ++i) {
+        Move m = moves.moves[i];
+        PieceType attacker = b.piece_at(m.from);
+        
+        if (m.captured != NO_PIECE) {
+            // Band 1: Captures get a massive score boost so they are searched first
+            move_scores[i] = 1000000 + (piece_values[m.captured] * 10) - piece_values[attacker];
+        } else {
+            // Quiet moves
+            if (ply < MAX_PLY && m == killer_moves[ply][0]) {
+                move_scores[i] = 900000;
+            } else if (ply < MAX_PLY && m == killer_moves[ply][1]) {
+                move_scores[i] = 800000;
+            } else {
+                int hist = history_table[side][m.from][m.to];
+                if (hist > 690000) hist = 690000; // Cap safely
+                move_scores[i] = hist;
+            }
+        }
+        
+        // Band 0: Scout moves take absolute priority
+        if (attacker == SCOUT) {
+            move_scores[i] += 5000000;
+        }
+    }
+}
+
 // Alpha-Beta Search
-int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta) {
+int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta, int ply) {
     nodes_visited++;
     
     // Check for draw by repetition or 50-move rule
@@ -256,34 +246,68 @@ int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta) {
         return 0; // Draw
     }
     
-    // Move ordering? (Captures first?)
-    // Basic ordering: if capture, put front.
-    // For now, simpler improvement first.
+    // Move scoring
+    int move_scores[256];
+    score_moves(moves, move_scores, b, ply);
     
     if (side == WHITE) { // Maximize
         int max_eval = -2000000;
         for (int i = 0; i < moves.count; ++i) {
+            // Lazy sorting inline
+            int best_idx = i;
+            for (int j = i + 1; j < moves.count; ++j) {
+                if (move_scores[j] > move_scores[best_idx]) best_idx = j;
+            }
+            std::swap(move_scores[i], move_scores[best_idx]);
+            std::swap(moves.moves[i], moves.moves[best_idx]);
+            
             Move move = moves.moves[i];
             {
                 ScopedMoveV1 sm(b, move);
-                int eval = alphabeta(b, depth - 1, alpha, beta);
+                int eval = alphabeta(b, depth - 1, alpha, beta, ply + 1);
                 max_eval = std::max(max_eval, eval);
                 alpha = std::max(alpha, eval);
             }
-             if (beta <= alpha) break; // Beta Cutoff
+             if (beta <= alpha) {
+                 if (move.captured == NO_PIECE) {
+                     history_table[WHITE][move.from][move.to] += depth * depth;
+                     if (ply < MAX_PLY && !(killer_moves[ply][0] == move)) {
+                         killer_moves[ply][1] = killer_moves[ply][0];
+                         killer_moves[ply][0] = move;
+                     }
+                 }
+                 break; // Beta Cutoff
+             }
         }
         return max_eval;
     } else { // Minimize
         int min_eval = 2000000;
         for (int i = 0; i < moves.count; ++i) {
+            // Lazy sorting inline
+            int best_idx = i;
+            for (int j = i + 1; j < moves.count; ++j) {
+                if (move_scores[j] > move_scores[best_idx]) best_idx = j;
+            }
+            std::swap(move_scores[i], move_scores[best_idx]);
+            std::swap(moves.moves[i], moves.moves[best_idx]);
+            
             Move move = moves.moves[i];
             {
                 ScopedMoveV1 sm(b, move);
-                int eval = alphabeta(b, depth - 1, alpha, beta);
+                int eval = alphabeta(b, depth - 1, alpha, beta, ply + 1);
                 min_eval = std::min(min_eval, eval);
                 beta = std::min(beta, eval);
             }
-             if (beta <= alpha) break; // Alpha Cutoff
+             if (beta <= alpha) {
+                 if (move.captured == NO_PIECE) {
+                     history_table[BLACK][move.from][move.to] += depth * depth;
+                     if (ply < MAX_PLY && !(killer_moves[ply][0] == move)) {
+                         killer_moves[ply][1] = killer_moves[ply][0];
+                         killer_moves[ply][0] = move;
+                     }
+                 }
+                 break; // Alpha Cutoff
+             }
         }
         return min_eval;
     }
@@ -294,6 +318,21 @@ Move EngineV1::search(Board& b, double time_limit) {
     time_limit_sec = time_limit;
     nodes_visited = 0;
     last_depth = 0;
+    
+    // Clear killers array for this search
+    for (int p = 0; p < MAX_PLY; ++p) {
+        killer_moves[p][0] = Move();
+        killer_moves[p][1] = Move();
+    }
+    
+    // Decay history roughly by half over time
+    for (int c = 0; c < 2; ++c) {
+        for (int f = 0; f < 256; ++f) {
+            for (int t = 0; t < 256; ++t) {
+                history_table[c][f][t] /= 2;
+            }
+        }
+    }
     
     Move best_move;
     int max_depth = 100; 
@@ -307,6 +346,10 @@ Move EngineV1::search(Board& b, double time_limit) {
             
             if (moves.count == 0) return Move();
             
+            // Move scoring
+            int move_scores[256];
+            score_moves(moves, move_scores, b, 0); // Root is ply 0
+
             Move current_best_move;
             int best_score;
             int alpha = -2000000;
@@ -315,11 +358,19 @@ Move EngineV1::search(Board& b, double time_limit) {
             if (side == WHITE) {
                 best_score = -2000000;
                 for (int i = 0; i < moves.count; ++i) {
+                    // Lazy sorting inline
+                    int best_idx = i;
+                    for (int j = i + 1; j < moves.count; ++j) {
+                        if (move_scores[j] > move_scores[best_idx]) best_idx = j;
+                    }
+                    std::swap(move_scores[i], move_scores[best_idx]);
+                    std::swap(moves.moves[i], moves.moves[best_idx]);
+                    
                     Move move = moves.moves[i];
                     int score;
                     {
                         ScopedMoveV1 sm(b, move);
-                        score = alphabeta(b, depth - 1, alpha, beta);
+                        score = alphabeta(b, depth - 1, alpha, beta, 1);
                     }
                     
                     if (score > best_score) {
@@ -333,11 +384,19 @@ Move EngineV1::search(Board& b, double time_limit) {
             } else {
                 best_score = 2000000;
                 for (int i = 0; i < moves.count; ++i) {
+                    // Lazy sorting inline
+                    int best_idx = i;
+                    for (int j = i + 1; j < moves.count; ++j) {
+                        if (move_scores[j] > move_scores[best_idx]) best_idx = j;
+                    }
+                    std::swap(move_scores[i], move_scores[best_idx]);
+                    std::swap(moves.moves[i], moves.moves[best_idx]);
+                    
                     Move move = moves.moves[i];
                     int score;
                     {
                         ScopedMoveV1 sm(b, move);
-                        score = alphabeta(b, depth - 1, alpha, beta);
+                        score = alphabeta(b, depth - 1, alpha, beta, 1);
                     }
                     
                     if (score < best_score) {

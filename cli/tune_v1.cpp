@@ -1,4 +1,4 @@
-#include "../src/engine_v3.h"
+#include "../src/engine_v1.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -13,8 +13,8 @@
 #include <windows.h>
 #endif
 
-const double TIME_TO_THINK = 0.2; // Think time per move (short for fast tuning)
-const int MATCHES_PER_ITER = 20; // 20 matches total
+const double TIME_TO_THINK = 0.4; // Think time per move (short for fast tuning)
+const int MATCHES_PER_ITER = 40; // 40 matches total
 const int MAX_PLY_LIMIT = 500;   // Threshold to end game
 const double ACCEPT_THRESHOLD = 0.55; // Threshold win rate to accept new values (e.g. 0.55 = 55% score required)
 
@@ -52,20 +52,36 @@ void randomize_values(const int base[9], int tweaked[9]) {
 
 // Returns pair<int, int> representing <winner, moves_played>
 // Winner: 1 if p1 wins, -1 if p2 wins, 0 if draw
-std::pair<int, int> play_game(EngineV3& p1, EngineV3& p2) {
+std::pair<int, int> play_game(EngineV1& p1, EngineV1& p2) {
     Board b;
     int moves = 0;
+    
+    static thread_local std::mt19937 rng(std::random_device{}());
+
     while (!b.is_game_over() && moves < MAX_PLY_LIMIT) {
         if (b.is_draw()) break;
         
         Color side = b.side_to_move();
         Move m;
-        if (side == WHITE) m = p1.search(b, TIME_TO_THINK);
-        else m = p2.search(b, TIME_TO_THINK);
+        
+        if (moves < 5) { // Randomize first 5 opening moves
+            MoveList list;
+            b.generate_moves(list);
+            if (list.count == 0) break;
+            std::uniform_int_distribution<int> dist(0, list.count - 1);
+            m = list.moves[dist(rng)];
+        } else {
+            if (side == WHITE) m = p1.search(b, TIME_TO_THINK);
+            else m = p2.search(b, TIME_TO_THINK);
+        }
         
         if (m.from == 0 && m.to == 0) break; // No moves / Resign
         b.make_move(m);
         moves++;
+    }
+    
+    if (moves >= MAX_PLY_LIMIT) {
+        return {0, moves}; // Draw based on ply limit
     }
     
     // Material evaluation to decide winner
@@ -123,55 +139,58 @@ int main() {
         std::vector<std::future<void>> futures;
         std::mutex mtx; // Protects scores and std::cout
 
-        for (int i = 0; i < MATCHES_PER_ITER; ++i) {
-            // Spawn each game securely onto its own thread
-            futures.push_back(std::async(std::launch::async, [i, &base_values, &tweaked_values, &score_tweaked, &score_base, &draws, &mtx]() {
-                EngineV3 base_engine;
-                base_engine.set_piece_values(base_values);
-                
-                EngineV3 tweaked_engine;
-                tweaked_engine.set_piece_values(tweaked_values);
-                
-                int res = 0;
-                int moves = 0;
-                std::string log_msg;
+        for (int i = 0; i < MATCHES_PER_ITER; i += 4) {
+            std::vector<std::future<void>> batch_futures;
+            for (int j = 0; j < 4 && i + j < MATCHES_PER_ITER; ++j) {
+                int game_idx = i + j;
+                batch_futures.push_back(std::async(std::launch::async, [game_idx, &base_values, &tweaked_values, &score_tweaked, &score_base, &draws, &mtx]() {
+                    EngineV1 base_engine;
+                    base_engine.set_piece_values(base_values);
+                    
+                    EngineV1 tweaked_engine;
+                    tweaked_engine.set_piece_values(tweaked_values);
+                    
+                    int res = 0;
+                    int moves = 0;
+                    std::string log_msg;
 
-                if (i % 2 == 0) {
-                    // Tweaked as White (p1), Base as Black (p2)
-                    auto result = play_game(tweaked_engine, base_engine);
-                    res = result.first;
-                    moves = result.second;
-                    log_msg = "Game " + std::to_string(i+1) + ": Tweaked (White) vs Base (Black) | Result: " +
-                              (res == 1 ? "Tweaked Win" : (res == -1 ? "Base Win" : "Draw")) +
-                              " | Moves: " + std::to_string(moves) + "\n";
-                } else {
-                    // Base as White (p1), Tweaked as Black (p2)
-                    auto result = play_game(base_engine, tweaked_engine);
-                    res = result.first;
-                    moves = result.second;
-                    log_msg = "Game " + std::to_string(i+1) + ": Base (White) vs Tweaked (Black) | Result: " +
-                              (res == -1 ? "Tweaked Win" : (res == 1 ? "Base Win" : "Draw")) +
-                              " | Moves: " + std::to_string(moves) + "\n";
-                }
+                    if (game_idx % 2 == 0) {
+                        // Tweaked as White (p1), Base as Black (p2)
+                        auto result = play_game(tweaked_engine, base_engine);
+                        res = result.first;
+                        moves = result.second;
+                        log_msg = "Game " + std::to_string(game_idx+1) + ": Tweaked (White) vs Base (Black) | Result: " +
+                                  (res == 1 ? "Tweaked Win" : (res == -1 ? "Base Win" : "Draw")) +
+                                  " | Moves: " + std::to_string(moves) + "\n";
+                    } else {
+                        // Base as White (p1), Tweaked as Black (p2)
+                        auto result = play_game(base_engine, tweaked_engine);
+                        res = result.first;
+                        moves = result.second;
+                        log_msg = "Game " + std::to_string(game_idx+1) + ": Base (White) vs Tweaked (Black) | Result: " +
+                                  (res == -1 ? "Tweaked Win" : (res == 1 ? "Base Win" : "Draw")) +
+                                  " | Moves: " + std::to_string(moves) + "\n";
+                    }
 
-                // Lock the mutex to securely update numbers and print
-                std::lock_guard<std::mutex> lock(mtx);
-                std::cout << log_msg;
-                if (i % 2 == 0) {
-                    if (res == 1) score_tweaked++;
-                    else if (res == -1) score_base++;
-                    else draws++;
-                } else {
-                    if (res == -1) score_tweaked++;
-                    else if (res == 1) score_base++;
-                    else draws++;
-                }
-            }));
-        }
+                    // Lock the mutex to securely update numbers and print
+                    std::lock_guard<std::mutex> lock(mtx);
+                    std::cout << log_msg;
+                    if (game_idx % 2 == 0) {
+                        if (res == 1) score_tweaked++;
+                        else if (res == -1) score_base++;
+                        else draws++;
+                    } else {
+                        if (res == -1) score_tweaked++;
+                        else if (res == 1) score_base++;
+                        else draws++;
+                    }
+                }));
+            }
 
-        // Wait for all 20 threads to finish parallel processing
-        for (auto& f : futures) {
-            f.wait();
+            // Wait for max 4 threads to finish before spawning next batch
+            for (auto& f : batch_futures) {
+                f.wait();
+            }
         }
         
         std::cout << "\nResults: Tweaked won " << score_tweaked << " | Base won " << score_base << " | Draws " << draws << "\n";

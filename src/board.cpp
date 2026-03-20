@@ -1,7 +1,7 @@
 #include "board.h"
+#include "eval_constants.h"
 #include <iomanip>
 #include <cstring>
-#include <vector>
 
 void Board::add_piece_to_list(int sq, Color c) {
     if (c == WHITE) {
@@ -45,14 +45,25 @@ void Board::set_piece(int sq, PieceType p, Color c) {
     }
     if (pieces[sq] != NO_PIECE && pieces[sq] != OFFBOARD) {
         remove_piece_from_list(sq, colors[sq]);
+        piece_counts[colors[sq]][pieces[sq]]--;
+        game_phase -= EvalConstants::get_piece_phase(pieces[sq]);
+        int pst_idx = (colors[sq] == WHITE) ? ((sq >> 4) * 12 + (sq & 15)) : ((11 - (sq >> 4)) * 12 + (sq & 15));
+        pst_mg[colors[sq]] -= EvalConstants::get_pst_value(pieces[sq], pst_idx, false);
+        pst_eg[colors[sq]] -= EvalConstants::get_pst_value(pieces[sq], pst_idx, true);
     }
     pieces[sq] = p;
     colors[sq] = c;
     if (p == PRINCE) {
         prince_count[c]++;
+        prince_sq[c] = sq;
     }
     if (p != NO_PIECE && p != OFFBOARD) {
         add_piece_to_list(sq, c);
+        piece_counts[c][p]++;
+        game_phase += EvalConstants::get_piece_phase(p);
+        int pst_idx = (c == WHITE) ? ((sq >> 4) * 12 + (sq & 15)) : ((11 - (sq >> 4)) * 12 + (sq & 15));
+        pst_mg[c] += EvalConstants::get_pst_value(p, pst_idx, false);
+        pst_eg[c] += EvalConstants::get_pst_value(p, pst_idx, true);
     }
 }
 
@@ -60,9 +71,15 @@ void Board::clear_piece(int sq) {
     if (sq < 0 || sq >= 256) return;
     if (pieces[sq] == PRINCE) {
         prince_count[colors[sq]]--;
+        if (prince_sq[colors[sq]] == sq) prince_sq[colors[sq]] = -1;
     }
     if (pieces[sq] != NO_PIECE && pieces[sq] != OFFBOARD) {
         remove_piece_from_list(sq, colors[sq]);
+        piece_counts[colors[sq]][pieces[sq]]--;
+        game_phase -= EvalConstants::get_piece_phase(pieces[sq]);
+        int pst_idx = (colors[sq] == WHITE) ? ((sq >> 4) * 12 + (sq & 15)) : ((11 - (sq >> 4)) * 12 + (sq & 15));
+        pst_mg[colors[sq]] -= EvalConstants::get_pst_value(pieces[sq], pst_idx, false);
+        pst_eg[colors[sq]] -= EvalConstants::get_pst_value(pieces[sq], pst_idx, true);
     }
     pieces[sq] = NO_PIECE;       
     colors[sq] = COLOR_NB;
@@ -85,6 +102,12 @@ Board::Board() {
 void Board::reset() {
     whitePieceCount = 0;
     blackPieceCount = 0;
+    for (int i=0; i<10; ++i) { piece_counts[0][i] = 0; piece_counts[1][i] = 0; }
+    pst_mg[0] = 0; pst_mg[1] = 0;
+    pst_eg[0] = 0; pst_eg[1] = 0;
+    game_phase = 0;
+    prince_sq[0] = -1; prince_sq[1] = -1;
+    
     for(int i=0; i<256; ++i) {
         pieceIndex[i] = -1;
         if ((i & 15) >= 12 || (i >> 4) >= 12) {
@@ -98,8 +121,7 @@ void Board::reset() {
     prince_count[WHITE] = 0;
     prince_count[BLACK] = 0;
     half_move_clock = 0;
-    half_move_history.reserve(2000);
-    half_move_history.clear();
+    history_count = 0;
     turn = WHITE;
     
     PieceType placement[] = {
@@ -129,10 +151,6 @@ void Board::reset() {
         set_piece(160 + i, BABY, BLACK);
         zobrist_key ^= piece_keys[160+i][BLACK][BABY];
     }
-    
-    history.reserve(2000);
-    history.clear();
-    half_move_history.clear();
 }
 
 void Board::print() const {
@@ -338,8 +356,11 @@ void Board::init_zobrist() {
 }
 
 void Board::make_move(const Move& m) {
-    history.push_back(zobrist_key);
-    half_move_history.push_back(half_move_clock);
+    if (history_count < 2048) {
+        history[history_count] = zobrist_key;
+        half_move_history[history_count] = half_move_clock;
+        history_count++;
+    }
     
     PieceType p = pieces[m.from];
     Color c = colors[m.from];
@@ -352,12 +373,33 @@ void Board::make_move(const Move& m) {
     
     zobrist_key ^= piece_keys[m.from][c][p];
     
+    int from_idx = (c == WHITE) ? ((m.from >> 4) * 12 + (m.from & 15)) : ((11 - (m.from >> 4)) * 12 + (m.from & 15));
+    int to_idx = (c == WHITE) ? ((m.to >> 4) * 12 + (m.to & 15)) : ((11 - (m.to >> 4)) * 12 + (m.to & 15));
+    
+    pst_mg[c] -= EvalConstants::get_pst_value(p, from_idx, false);
+    pst_eg[c] -= EvalConstants::get_pst_value(p, from_idx, true);
+    pst_mg[c] += EvalConstants::get_pst_value(p, to_idx, false);
+    pst_eg[c] += EvalConstants::get_pst_value(p, to_idx, true);
+    
+    if (p == PRINCE) {
+        prince_sq[c] = m.to;
+    }
+    
     if (pieces[m.to] != NO_PIECE && pieces[m.to] != OFFBOARD) {
-        zobrist_key ^= piece_keys[m.to][colors[m.to]][pieces[m.to]];
+        PieceType cap = pieces[m.to];
+        Color cap_c = colors[m.to];
+        int cap_idx = (cap_c == WHITE) ? ((m.to >> 4) * 12 + (m.to & 15)) : ((11 - (m.to >> 4)) * 12 + (m.to & 15));
+        
+        piece_counts[cap_c][cap]--;
+        game_phase -= EvalConstants::get_piece_phase(cap);
+        pst_mg[cap_c] -= EvalConstants::get_pst_value(cap, cap_idx, false);
+        pst_eg[cap_c] -= EvalConstants::get_pst_value(cap, cap_idx, true);
+        
+        zobrist_key ^= piece_keys[m.to][cap_c][cap];
         if (m.captured == PRINCE) {
             prince_count[(Color)(1-c)]--;
         }
-        remove_piece_from_list(m.to, colors[m.to]);
+        remove_piece_from_list(m.to, cap_c);
     }
     
     zobrist_key ^= piece_keys[m.to][c][p];
@@ -378,6 +420,19 @@ void Board::unmake_move(const Move& m) {
     
     PieceType p = pieces[m.to];
     Color c = colors[m.to];
+    
+    int from_idx = (c == WHITE) ? ((m.from >> 4) * 12 + (m.from & 15)) : ((11 - (m.from >> 4)) * 12 + (m.from & 15));
+    int to_idx = (c == WHITE) ? ((m.to >> 4) * 12 + (m.to & 15)) : ((11 - (m.to >> 4)) * 12 + (m.to & 15));
+    
+    pst_mg[c] -= EvalConstants::get_pst_value(p, to_idx, false);
+    pst_eg[c] -= EvalConstants::get_pst_value(p, to_idx, true);
+    pst_mg[c] += EvalConstants::get_pst_value(p, from_idx, false);
+    pst_eg[c] += EvalConstants::get_pst_value(p, from_idx, true);
+    
+    if (p == PRINCE) {
+        prince_sq[c] = m.from;
+    }
+    
     zobrist_key ^= piece_keys[m.to][c][p];
     
     pieces[m.from] = p;
@@ -388,20 +443,28 @@ void Board::unmake_move(const Move& m) {
     
     pieces[m.to] = m.captured;
     if (m.captured != NO_PIECE && m.captured != OFFBOARD) {
-        colors[m.to] = (Color)(1 - c);
-        zobrist_key ^= piece_keys[m.to][colors[m.to]][m.captured];
+        Color cap_c = (Color)(1 - c);
+        colors[m.to] = cap_c;
+        int cap_idx = (cap_c == WHITE) ? ((m.to >> 4) * 12 + (m.to & 15)) : ((11 - (m.to >> 4)) * 12 + (m.to & 15));
+        
+        piece_counts[cap_c][m.captured]++;
+        game_phase += EvalConstants::get_piece_phase(m.captured);
+        pst_mg[cap_c] += EvalConstants::get_pst_value(m.captured, cap_idx, false);
+        pst_eg[cap_c] += EvalConstants::get_pst_value(m.captured, cap_idx, true);
+        
+        zobrist_key ^= piece_keys[m.to][cap_c][m.captured];
         if (m.captured == PRINCE) {
-            prince_count[(Color)(1-c)]++;
+            prince_count[cap_c]++;
+            prince_sq[cap_c] = m.to; 
         }
-        add_piece_to_list(m.to, colors[m.to]);
+        add_piece_to_list(m.to, cap_c);
     } else {
         colors[m.to] = COLOR_NB;
     }
     
-    if (!history.empty()) history.pop_back();
-    if (!half_move_history.empty()) {
-        half_move_clock = half_move_history.back();
-        half_move_history.pop_back();
+    if (history_count > 0) {
+        history_count--;
+        half_move_clock = half_move_history[history_count];
     }
 }
 
@@ -412,9 +475,11 @@ bool Board::is_game_over() const {
 }
 
 bool Board::is_repetition() const {
+    int limit = half_move_clock;
+    if (limit > history_count) limit = history_count;
     int count = 0;
-    for (auto it = history.rbegin(); it != history.rend(); ++it) {
-        if (*it == zobrist_key) {
+    for (int i = 1; i <= limit; ++i) {
+        if (history[history_count - i] == zobrist_key) {
             count++;
             if (count >= 2) return true; 
         }

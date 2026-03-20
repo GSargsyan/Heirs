@@ -1,8 +1,8 @@
 #include "../src/engine_v1.h"
-#include "../src/engine_v2.h"
-#include "../src/engine_v3.h"
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <string>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -33,8 +33,21 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 5;
+const double TIME_TO_THINK_WHITE = 1;
 const double TIME_TO_THINK_BLACK = 1;
+
+// Use tuned piece values from piece_values.txt
+const bool USE_TUNED_VALUES_WHITE = false;
+const bool USE_TUNED_VALUES_BLACK = false;
+
+bool load_values(const std::string& filename, int values[9]) {
+    std::ifstream in(filename);
+    if (!in) return false;
+    for (int i = 0; i < 9; ++i) {
+        if (!(in >> values[i])) return false;
+    }
+    return true;
+}
 
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
@@ -45,8 +58,28 @@ int main(int argc, char* argv[]) {
     Board b;
     // b.reset(); // Constructor calls reset
     
-    EngineV3 engine_white;
+    // Using EngineV1 for both so they can be tested against each other with different values
+    EngineV1 engine_white;
     EngineV1 engine_black;
+    
+    if (USE_TUNED_VALUES_WHITE) {
+        int vals[9];
+        if (load_values("piece_values.txt", vals) || load_values("../piece_values.txt", vals)) {
+            engine_white.set_piece_values(vals);
+            std::cout << "White is using tuned piece values from file.\n";
+        } else {
+            std::cout << "Failed to load piece_values.txt for White.\n";
+        }
+    }
+    if (USE_TUNED_VALUES_BLACK) {
+        int vals[9];
+        if (load_values("piece_values.txt", vals) || load_values("../piece_values.txt", vals)) {
+            engine_black.set_piece_values(vals);
+            std::cout << "Black is using tuned piece values from file.\n";
+        } else {
+            std::cout << "Failed to load piece_values.txt for Black.\n";
+        }
+    }
     
     std::cout << "Starting match with time limits: White=" << TIME_TO_THINK_WHITE << "s, Black=" << TIME_TO_THINK_BLACK << "s" << std::endl;
     b.print();

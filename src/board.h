@@ -1,7 +1,6 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <vector>
 #include <cstdint>
 #include <iostream>
 #include <string>
@@ -91,6 +90,13 @@ public:
     
     void print() const;
     
+    // Incremental Evaluation Tracking
+    int piece_counts[2][10];
+    int pst_mg[2];
+    int pst_eg[2];
+    int game_phase;
+    int prince_sq[2];
+
 private:
     PieceType pieces[256];
     Color colors[256];
@@ -98,11 +104,12 @@ private:
     
     // Zobrist Hashing
     uint64_t zobrist_key;
-    std::vector<uint64_t> history;
+    uint64_t history[2048];
     
     // 50-move rule
     int half_move_clock;
-    std::vector<int> half_move_history;
+    int half_move_history[2048];
+    int history_count;
     
     static uint64_t piece_keys[256][2][10];
     static uint64_t side_key;
