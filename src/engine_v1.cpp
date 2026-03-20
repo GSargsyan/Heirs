@@ -9,12 +9,12 @@ using namespace std::chrono;
 
 #include "eval_constants.h"
 
-// VERSION 1 Engine
+// VERSION 3 Engine
 
 long long EngineV1::get_nodes_visited() const { return nodes_visited; }
 int EngineV1::get_max_depth() const { return last_depth; }
 
-EngineV1::EngineV1() : nodes_visited(0), last_depth(0) {
+EngineV1::EngineV1() : nodes_visited(0), last_depth(0), tt(16) {
     for (int i = 0; i < 9; ++i) {
         piece_values[i] = EvalConstants::PIECE_VALUES[i];
     }
@@ -157,14 +157,70 @@ int EngineV1::evaluate(const Board& b) {
     eg_score += w_prince_moves * 10;
     eg_score -= b_prince_moves * 10;
 
+    // --- EARLY GAME DEVELOPMENT PENALTY ---
+    if (game_phase > 200) {
+        if (b.piece_at(5) != PRINCESS) {
+            int w_undeveloped = 0;
+            if (b.piece_at(1) == PONY) w_undeveloped++;
+            if (b.piece_at(2) == TUTOR) w_undeveloped++;
+            if (b.piece_at(4) == SIBLING) w_undeveloped++;
+            if (b.piece_at(7) == SIBLING) w_undeveloped++;
+            if (b.piece_at(9) == TUTOR) w_undeveloped++;
+            if (b.piece_at(10) == PONY) w_undeveloped++;
+            mg_score -= w_undeveloped * 30;
+        }
+        
+        if (b.piece_at(181) != PRINCESS) {
+            int b_undeveloped = 0;
+            if (b.piece_at(177) == PONY) b_undeveloped++;
+            if (b.piece_at(178) == TUTOR) b_undeveloped++;
+            if (b.piece_at(180) == SIBLING) b_undeveloped++;
+            if (b.piece_at(183) == SIBLING) b_undeveloped++;
+            if (b.piece_at(185) == TUTOR) b_undeveloped++;
+            if (b.piece_at(186) == PONY) b_undeveloped++;
+            mg_score += b_undeveloped * 30; // penalize black
+        }
+    }
+
+    // --- MOP-UP EVALUATION (Force Checkmate) ---
+    int winning_threshold = 400;
+
+    if (eg_score > winning_threshold && game_phase < 150) {
+        int w_prince_r = (white_prince_sq >> 4) & 15;
+        int w_prince_c = white_prince_sq & 15;
+        int b_prince_r = (black_prince_sq >> 4) & 15;
+        int b_prince_c = black_prince_sq & 15;
+
+        int center_dist = std::abs(b_prince_r - 5) + std::abs(b_prince_c - 5) + 
+                          std::abs(b_prince_r - 6) + std::abs(b_prince_c - 6);
+        eg_score += center_dist * 20;
+
+        int princes_dist = std::abs(w_prince_r - b_prince_r) + std::abs(w_prince_c - b_prince_c);
+        eg_score += (24 - princes_dist) * 10;
+    }
+    else if (eg_score < -winning_threshold && game_phase < 150) {
+        int w_prince_r = (white_prince_sq >> 4) & 15;
+        int w_prince_c = white_prince_sq & 15;
+        int b_prince_r = (black_prince_sq >> 4) & 15;
+        int b_prince_c = black_prince_sq & 15;
+
+        int center_dist = std::abs(w_prince_r - 5) + std::abs(w_prince_c - 5) + 
+                          std::abs(w_prince_r - 6) + std::abs(w_prince_c - 6);
+        eg_score -= center_dist * 20;
+
+        int princes_dist = std::abs(b_prince_r - w_prince_r) + std::abs(b_prince_c - w_prince_c);
+        eg_score -= (24 - princes_dist) * 10;
+    }
+
     // 3. TAPERED BLEND
     int phase = std::min(game_phase, EvalConstants::MAX_PHASE);
     int final_score = (mg_score * phase + eg_score * (EvalConstants::MAX_PHASE - phase)) / EvalConstants::MAX_PHASE;
 
-    return final_score;
+    return (b.side_to_move() == WHITE) ? final_score : -final_score;
 }
 
 bool EngineV1::is_time_up() {
+    if (time_limit_sec <= 0.0) return false;
     auto now = steady_clock::now();
     duration<double> elapsed = now - start_time;
     return elapsed.count() >= time_limit_sec;
@@ -182,13 +238,29 @@ struct ScopedMoveV1 {
     }
 };
 
-void EngineV1::score_moves(const MoveList& moves, int* move_scores, const Board& b, int ply) {
+struct ScopedNullMoveV1 {
+    Board& b;
+    ScopedNullMoveV1(Board& board) : b(board) {
+        b.make_null_move();
+    }
+    ~ScopedNullMoveV1() {
+        b.unmake_null_move();
+    }
+};
+
+void EngineV1::score_moves(const MoveList& moves, int* move_scores, const Board& b, int ply, Move tt_move) {
     if (moves.count == 0) return;
     
     Color side = b.side_to_move();
     
     for (int i = 0; i < moves.count; ++i) {
         Move m = moves.moves[i];
+        
+        if (m == tt_move) {
+            move_scores[i] = 10000000;
+            continue;
+        }
+
         PieceType attacker = b.piece_at(m.from);
         
         if (m.captured != NO_PIECE) {
@@ -214,24 +286,68 @@ void EngineV1::score_moves(const MoveList& moves, int* move_scores, const Board&
     }
 }
 
+
+
 // Alpha-Beta Search
 int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta, int ply) {
     nodes_visited++;
     
     // Check for draw by repetition or 50-move rule
-    if (b.is_draw()) {
-        return 0; 
+    // We must check this BEFORE the TT probe, because a position reached by 
+    // a cyclic path is a draw (score 0), whereas the same position reached 
+    // from a standard path might be evaluated and stored in the TT as winning (+x).
+    if (ply > 0 && b.is_draw(1)) {
+        return 0; // Returning 0 on 1-fold repetition strictly avoids cycles
+    }
+
+    int original_alpha = alpha;
+    TTEntryV1 tt_entry;
+    Move tt_move;
+    if (tt.probe(b.get_hash(), tt_entry)) {
+        tt_move = tt_entry.best_move;
+        if (tt_entry.depth >= depth) {
+            if (tt_entry.bound == BOUND_EXACT_V1)
+                return tt_entry.score;
+            if (tt_entry.bound == BOUND_LOWER_V1)
+                alpha = std::max(alpha, tt_entry.score);
+            else if (tt_entry.bound == BOUND_UPPER_V1)
+                beta = std::min(beta, tt_entry.score);
+            if (alpha >= beta)
+                return tt_entry.score;
+        }
     }
     
-    if (depth == 0 || b.is_game_over()) {
+    if (depth == 0) {
+        return quiescence(b, alpha, beta, ply);
+    }
+
+    if (b.is_game_over()) {
         int eval = evaluate(b);
         // Prefer faster mates (higher remaining depth = faster mate)
+        // With relative scoring, being materially winning guarantees +score > 10000
         if (eval > 10000) {
             eval += depth * 100;
         } else if (eval < -10000) {
             eval -= depth * 100;
         }
         return eval;
+    }
+
+    // Null Move Pruning
+    if (depth >= 3 && b.game_phase > 100) {
+        int stand_pat = evaluate(b);
+        if (stand_pat >= beta) {
+            int R = 2; // Fixed depth reduction
+            int null_score;
+            {
+                ScopedNullMoveV1 snm(b);
+                null_score = -alphabeta(b, depth - 1 - R, -beta, -beta + 1, ply + 1);
+            }
+            
+            if (null_score >= beta) {
+                return beta; // Fail-high, skip move generation
+            }
+        }
     }
     
     if ((nodes_visited & 1023) == 0) {
@@ -242,78 +358,168 @@ int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta, int ply) {
     MoveList moves;
     b.generate_moves(moves);
     
+    
     if (moves.count == 0) {
         return 0; // Draw
     }
     
+    // Futility Pruning Setup
+    bool futil_prune = false;
+    int futil_stand_pat = -2000000;
+    if (depth == 1 && !b.is_game_over() && !b.is_draw()) {
+        futil_stand_pat = evaluate(b);
+        int margin = piece_values[GUARD];
+        if (futil_stand_pat + margin < alpha) {
+            futil_prune = true;
+        }
+    }
+
     // Move scoring
     int move_scores[256];
-    score_moves(moves, move_scores, b, ply);
+    score_moves(moves, move_scores, b, ply, tt_move);
     
-    if (side == WHITE) { // Maximize
-        int max_eval = -2000000;
-        for (int i = 0; i < moves.count; ++i) {
-            // Lazy sorting inline
-            int best_idx = i;
-            for (int j = i + 1; j < moves.count; ++j) {
-                if (move_scores[j] > move_scores[best_idx]) best_idx = j;
-            }
-            std::swap(move_scores[i], move_scores[best_idx]);
-            std::swap(moves.moves[i], moves.moves[best_idx]);
-            
-            Move move = moves.moves[i];
-            {
-                ScopedMoveV1 sm(b, move);
-                int eval = alphabeta(b, depth - 1, alpha, beta, ply + 1);
-                max_eval = std::max(max_eval, eval);
-                alpha = std::max(alpha, eval);
-            }
-             if (beta <= alpha) {
-                 if (move.captured == NO_PIECE) {
-                     history_table[WHITE][move.from][move.to] += depth * depth;
-                     if (ply < MAX_PLY && !(killer_moves[ply][0] == move)) {
-                         killer_moves[ply][1] = killer_moves[ply][0];
-                         killer_moves[ply][0] = move;
-                     }
-                 }
-                 break; // Beta Cutoff
-             }
+    // Safe initialization bounding in case all moves are verified futile
+    int max_eval = futil_prune ? futil_stand_pat : -2000000;
+    Move best_move;
+    for (int i = 0; i < moves.count; ++i) {
+        // Lazy sorting inline
+        int best_idx = i;
+        for (int j = i + 1; j < moves.count; ++j) {
+            if (move_scores[j] > move_scores[best_idx]) best_idx = j;
         }
-        return max_eval;
-    } else { // Minimize
-        int min_eval = 2000000;
-        for (int i = 0; i < moves.count; ++i) {
-            // Lazy sorting inline
-            int best_idx = i;
-            for (int j = i + 1; j < moves.count; ++j) {
-                if (move_scores[j] > move_scores[best_idx]) best_idx = j;
-            }
-            std::swap(move_scores[i], move_scores[best_idx]);
-            std::swap(moves.moves[i], moves.moves[best_idx]);
-            
-            Move move = moves.moves[i];
-            {
-                ScopedMoveV1 sm(b, move);
-                int eval = alphabeta(b, depth - 1, alpha, beta, ply + 1);
-                min_eval = std::min(min_eval, eval);
-                beta = std::min(beta, eval);
-            }
-             if (beta <= alpha) {
-                 if (move.captured == NO_PIECE) {
-                     history_table[BLACK][move.from][move.to] += depth * depth;
-                     if (ply < MAX_PLY && !(killer_moves[ply][0] == move)) {
-                         killer_moves[ply][1] = killer_moves[ply][0];
-                         killer_moves[ply][0] = move;
-                     }
-                 }
-                 break; // Alpha Cutoff
-             }
+        std::swap(move_scores[i], move_scores[best_idx]);
+        std::swap(moves.moves[i], moves.moves[best_idx]);
+        
+        Move move = moves.moves[i];
+        
+        // Futility Pruning: purely skip unpromising quiet moves
+        if (futil_prune && move.captured == NO_PIECE) {
+            continue;
         }
-        return min_eval;
+
+        int eval;
+        {
+            ScopedMoveV1 sm(b, move);
+            if (i == 0) {
+                // Full window search for first move (PV node)
+                eval = -alphabeta(b, depth - 1, -beta, -alpha, ply + 1);
+            } else {
+                bool is_capture = (move.captured != NO_PIECE);
+                bool is_killer = (ply < MAX_PLY && (move == killer_moves[ply][0] || move == killer_moves[ply][1]));
+                bool do_lmr = (i >= 4 && depth >= 3 && !is_capture && !is_killer);
+
+                if (do_lmr) {
+                    // LMR zero-window search
+                    eval = -alphabeta(b, depth - 2, -alpha - 1, -alpha, ply + 1);
+                    if (eval > alpha) {
+                        // Failed high, needs standard depth zero-window search
+                        eval = -alphabeta(b, depth - 1, -alpha - 1, -alpha, ply + 1);
+                    }
+                } else {
+                    // Standard depth zero-window search (null-window)
+                    eval = -alphabeta(b, depth - 1, -alpha - 1, -alpha, ply + 1);
+                }
+                
+                if (eval > alpha && eval < beta) {
+                    // Full-window re-search if zero-window failed high
+                    eval = -alphabeta(b, depth - 1, -beta, -alpha, ply + 1);
+                }
+            }
+        }
+        
+        if (eval > max_eval) {
+            max_eval = eval;
+            best_move = move;
+        }
+        alpha = std::max(alpha, eval);
+        if (alpha >= beta) {
+            if (move.captured == NO_PIECE) {
+                history_table[side][move.from][move.to] += depth * depth;
+                if (ply < MAX_PLY && !(killer_moves[ply][0] == move)) {
+                    killer_moves[ply][1] = killer_moves[ply][0];
+                    killer_moves[ply][0] = move;
+                }
+            }
+            break; // Beta Cutoff
+        }
     }
+    
+    TTBoundV1 bound;
+    if (max_eval <= original_alpha) bound = BOUND_UPPER_V1;
+    else if (max_eval >= beta) bound = BOUND_LOWER_V1;
+    else bound = BOUND_EXACT_V1;
+    tt.store(b.get_hash(), depth, max_eval, bound, best_move);
+    
+    return max_eval;
 }
 
-Move EngineV1::search(Board& b, double time_limit) {
+// Quiescence Search
+int EngineV1::quiescence(Board& b, int alpha, int beta, int ply) {
+    nodes_visited++;
+    
+    if ((nodes_visited & 1023) == 0) {
+        if (is_time_up()) throw std::runtime_error("Time limit exceeded");
+    }
+
+    if (b.is_draw(1)) return 0; // 1-fold repetition strictly avoids cycles inside search
+
+    int stand_pat = evaluate(b);
+
+    if (stand_pat >= beta) return beta;
+    if (alpha < stand_pat) alpha = stand_pat;
+
+    if (b.is_game_over()) {
+        return stand_pat;
+    }
+
+    MoveList moves;
+    b.generate_moves(moves);
+    
+
+    if (moves.count == 0) return stand_pat;
+
+    int capture_count = 0;
+    Move captures[256];
+    int capture_scores[256];
+    
+    for (int i = 0; i < moves.count; ++i) {
+        Move m = moves.moves[i];
+        if (m.captured != NO_PIECE) {
+            captures[capture_count] = m;
+            PieceType attacker = b.piece_at(m.from);
+            // Material difference heuristic for QS move ordering
+            capture_scores[capture_count] = 1000000 + (piece_values[m.captured] * 10) - piece_values[attacker];
+            capture_count++;
+        }
+    }
+
+    int max_eval = stand_pat;
+    for (int i = 0; i < capture_count; ++i) {
+        int best_idx = i;
+        for (int j = i + 1; j < capture_count; ++j) {
+            if (capture_scores[j] > capture_scores[best_idx]) best_idx = j;
+        }
+        std::swap(capture_scores[i], capture_scores[best_idx]);
+        std::swap(captures[i], captures[best_idx]);
+        
+        Move move = captures[i];
+        
+
+
+        int eval;
+        {
+            ScopedMoveV1 sm(b, move);
+            eval = -quiescence(b, -beta, -alpha, ply + 1);
+        }
+        max_eval = std::max(max_eval, eval);
+        alpha = std::max(alpha, eval);
+        
+        if (alpha >= beta) break; // Beta Cutoff
+    }
+    return max_eval;
+}
+
+Move EngineV1::search(Board& b, double time_limit, int max_depth) {
     start_time = steady_clock::now();
     time_limit_sec = time_limit;
     nodes_visited = 0;
@@ -335,7 +541,6 @@ Move EngineV1::search(Board& b, double time_limit) {
     }
     
     Move best_move;
-    int max_depth = 100; 
     
     for (int depth = 1; depth <= max_depth; ++depth) {
         last_depth = depth;
@@ -344,69 +549,67 @@ Move EngineV1::search(Board& b, double time_limit) {
             MoveList moves;
             b.generate_moves(moves);
             
+
+            
             if (moves.count == 0) return Move();
             
             // Move scoring
             int move_scores[256];
-            score_moves(moves, move_scores, b, 0); // Root is ply 0
+            Move tt_move;
+            TTEntryV1 tt_entry;
+            if (tt.probe(b.get_hash(), tt_entry)) {
+                tt_move = tt_entry.best_move;
+            }
+            score_moves(moves, move_scores, b, 0, tt_move); // Root is ply 0
 
             Move current_best_move;
             int best_score;
             int alpha = -2000000;
             int beta = 2000000;
             
-            if (side == WHITE) {
-                best_score = -2000000;
-                for (int i = 0; i < moves.count; ++i) {
-                    // Lazy sorting inline
-                    int best_idx = i;
-                    for (int j = i + 1; j < moves.count; ++j) {
-                        if (move_scores[j] > move_scores[best_idx]) best_idx = j;
-                    }
-                    std::swap(move_scores[i], move_scores[best_idx]);
-                    std::swap(moves.moves[i], moves.moves[best_idx]);
-                    
-                    Move move = moves.moves[i];
-                    int score;
-                    {
-                        ScopedMoveV1 sm(b, move);
-                        score = alphabeta(b, depth - 1, alpha, beta, 1);
-                    }
-                    
-                    if (score > best_score) {
-                        best_score = score;
-                        current_best_move = move;
-                    }
-                    alpha = std::max(alpha, best_score); // Update alpha at root
-                    
-                    if (is_time_up()) throw std::runtime_error("Time limit");
+            best_score = -2000000;
+            for (int i = 0; i < moves.count; ++i) {
+                // Lazy sorting inline
+                int best_idx = i;
+                for (int j = i + 1; j < moves.count; ++j) {
+                    if (move_scores[j] > move_scores[best_idx]) best_idx = j;
                 }
-            } else {
-                best_score = 2000000;
-                for (int i = 0; i < moves.count; ++i) {
-                    // Lazy sorting inline
-                    int best_idx = i;
-                    for (int j = i + 1; j < moves.count; ++j) {
-                        if (move_scores[j] > move_scores[best_idx]) best_idx = j;
+                std::swap(move_scores[i], move_scores[best_idx]);
+                std::swap(moves.moves[i], moves.moves[best_idx]);
+                
+                Move move = moves.moves[i];
+                int score;
+                {
+                    ScopedMoveV1 sm(b, move);
+                    if (i == 0) {
+                        score = -alphabeta(b, depth - 1, -beta, -alpha, 1);
+                    } else {
+                        bool is_capture = (move.captured != NO_PIECE);
+                        bool is_killer = (move == killer_moves[0][0] || move == killer_moves[0][1]);
+                        bool do_lmr = (i >= 4 && depth >= 3 && !is_capture && !is_killer);
+
+                        if (do_lmr) {
+                            score = -alphabeta(b, depth - 2, -alpha - 1, -alpha, 1);
+                            if (score > alpha) {
+                                score = -alphabeta(b, depth - 1, -alpha - 1, -alpha, 1);
+                            }
+                        } else {
+                            score = -alphabeta(b, depth - 1, -alpha - 1, -alpha, 1);
+                        }
+                        
+                        if (score > alpha && score < beta) {
+                            score = -alphabeta(b, depth - 1, -beta, -alpha, 1);
+                        }
                     }
-                    std::swap(move_scores[i], move_scores[best_idx]);
-                    std::swap(moves.moves[i], moves.moves[best_idx]);
-                    
-                    Move move = moves.moves[i];
-                    int score;
-                    {
-                        ScopedMoveV1 sm(b, move);
-                        score = alphabeta(b, depth - 1, alpha, beta, 1);
-                    }
-                    
-                    if (score < best_score) {
-                        best_score = score;
-                        current_best_move = move;
-                    }
-                    beta = std::min(beta, best_score); // Update beta at root
-                    
-                    if (is_time_up()) throw std::runtime_error("Time limit");
                 }
+                
+                if (score > best_score) {
+                    best_score = score;
+                    current_best_move = move;
+                }
+                alpha = std::max(alpha, best_score); // Update alpha at root
+                
+                if (is_time_up()) throw std::runtime_error("Time limit");
             }
             
             best_move = current_best_move;

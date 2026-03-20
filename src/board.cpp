@@ -474,14 +474,14 @@ bool Board::is_game_over() const {
     return false;
 }
 
-bool Board::is_repetition() const {
+bool Board::is_repetition(int required_count) const {
     int limit = half_move_clock;
     if (limit > history_count) limit = history_count;
     int count = 0;
     for (int i = 1; i <= limit; ++i) {
         if (history[history_count - i] == zobrist_key) {
             count++;
-            if (count >= 2) return true; 
+            if (count >= required_count) return true; 
         }
     }
     return false;
@@ -491,7 +491,8 @@ bool Board::is_fifty_moves() const {
     return half_move_clock >= 100;
 }
 
-bool Board::is_draw() const {
-    if (is_repetition()) return true;
+bool Board::is_draw(int required_count) const {
+    if (is_fifty_moves()) return true;
+    if (is_repetition(required_count)) return true;
     return false;
 }

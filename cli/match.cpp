@@ -33,11 +33,11 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 0.6;
-const double TIME_TO_THINK_BLACK = 0.6;
+const double TIME_TO_THINK_WHITE = 0.5;
+const double TIME_TO_THINK_BLACK = 0.5;
 
 // Use tuned piece values from piece_values.txt
-const bool USE_TUNED_VALUES_WHITE = true;
+const bool USE_TUNED_VALUES_WHITE = false;
 const bool USE_TUNED_VALUES_BLACK = false;
 
 bool load_values(const std::string& filename, int values[9]) {
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
     Board b;
     // b.reset(); // Constructor calls reset
     
-    // Using EngineV1 for both so they can be tested against each other with different values
+    // EngineV1 vs EngineV1
     EngineV1 engine_white;
     EngineV1 engine_black;
     

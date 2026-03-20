@@ -3,14 +3,71 @@
 
 #include "board.h"
 #include <chrono>
+#include <vector>
 
+enum TTBoundV1 {
+    BOUND_NONE_V1,
+    BOUND_EXACT_V1,
+    BOUND_LOWER_V1,
+    BOUND_UPPER_V1
+};
+
+struct TTEntryV1 {
+    uint64_t key;
+    int depth;
+    int score;
+    TTBoundV1 bound;
+    Move best_move;
+};
+
+class TranspositionTableV1 {
+public:
+    TranspositionTableV1(size_t size_mb) {
+        size_t num_entries = (size_mb * 1024 * 1024) / sizeof(TTEntryV1);
+        table.resize(num_entries);
+        clear();
+    }
+
+    void clear() {
+        for (auto& entry : table) {
+            entry.key = 0;
+            entry.depth = -1;
+            entry.score = 0;
+            entry.bound = BOUND_NONE_V1;
+            entry.best_move = Move();
+        }
+    }
+
+    void store(uint64_t key, int depth, int score, TTBoundV1 bound, Move best_move) {
+        size_t index = key % table.size();
+        if (table[index].key == 0 || depth >= table[index].depth) {
+            table[index].key = key;
+            table[index].depth = depth;
+            table[index].score = score;
+            table[index].bound = bound;
+            table[index].best_move = best_move;
+        }
+    }
+
+    bool probe(uint64_t key, TTEntryV1& out_entry) const {
+        size_t index = key % table.size();
+        if (table[index].key == key) {
+            out_entry = table[index];
+            return true;
+        }
+        return false;
+    }
+
+private:
+    std::vector<TTEntryV1> table;
+};
 
 class EngineV1 {
 public:
     EngineV1();
     
-    // Search for the best move within the time limit (in seconds)
-    Move search(Board& b, double time_limit);
+    // Search for the best move within the time limit (or depth limit if time_limit <= 0)
+    Move search(Board& b, double time_limit, int max_depth = 100);
 
     long long get_nodes_visited() const;
     int get_max_depth() const;
@@ -21,14 +78,21 @@ public:
 private:
     int piece_values[9];
 
+    TranspositionTableV1 tt;
+
     // Alpha-Beta search
     int alphabeta(Board& b, int depth, int alpha, int beta, int ply);
     
     // Helper for move scoring
-    void score_moves(const MoveList& moves, int* move_scores, const Board& b, int ply);
+    void score_moves(const MoveList& moves, int* move_scores, const Board& b, int ply, Move tt_move);
     
     // Evaluation function
     int evaluate(const Board& b);
+
+    // Quiescence Search
+    int quiescence(Board& b, int alpha, int beta, int ply);
+    
+
     
     // Helper to check time
     bool is_time_up();

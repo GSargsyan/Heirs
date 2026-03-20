@@ -71,10 +71,20 @@ public:
     void make_move(const Move& m);
     void unmake_move(const Move& m);
     
+    void make_null_move() {
+        turn = (Color)(turn ^ 1);
+        if (zobrist_initialized) zobrist_key ^= side_key;
+    }
+    void unmake_null_move() {
+        turn = (Color)(turn ^ 1);
+        if (zobrist_initialized) zobrist_key ^= side_key;
+    }
+    
     // Game state
     Color side_to_move() const { return turn; }
     bool is_game_over() const;
     int get_half_move_clock() const { return half_move_clock; }
+    int get_history_count() const { return history_count; }
     
     // Piece lists access for fast evaluation
     const int* get_white_pieces() const { return whitePieces; }
@@ -83,9 +93,9 @@ public:
     int get_black_piece_count() const { return blackPieceCount; }
     
     // Draw detection
-    bool is_repetition() const;
+    bool is_repetition(int required_count = 2) const;
     bool is_fifty_moves() const;
-    bool is_draw() const; // Combines repetition and 50-moves
+    bool is_draw(int required_count = 2) const; // Combines repetition and 50-moves
     uint64_t get_hash() const { return zobrist_key; }
     
     void print() const;

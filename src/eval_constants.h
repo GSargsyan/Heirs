@@ -6,12 +6,12 @@
 namespace EvalConstants {
     const int DEFAULT_VAL_BABY = 100;
     const int DEFAULT_VAL_PRINCE = 20000;
-    const int DEFAULT_VAL_PRINCESS = 950;
-    const int DEFAULT_VAL_PONY = 120;
-    const int DEFAULT_VAL_GUARD = 300;
-    const int DEFAULT_VAL_TUTOR = 260;
-    const int DEFAULT_VAL_SCOUT = 350;
-    const int DEFAULT_VAL_SIBLING = 220;
+    const int DEFAULT_VAL_PRINCESS = 1000;
+    const int DEFAULT_VAL_PONY = 100;
+    const int DEFAULT_VAL_GUARD = 450;
+    const int DEFAULT_VAL_TUTOR = 350;
+    const int DEFAULT_VAL_SCOUT = 700;
+    const int DEFAULT_VAL_SIBLING = 300;
 
     const int PIECE_VALUES[] = {
         0, DEFAULT_VAL_BABY, DEFAULT_VAL_PRINCE, DEFAULT_VAL_PRINCESS, DEFAULT_VAL_PONY, 
