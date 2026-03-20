@@ -33,11 +33,11 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 1;
-const double TIME_TO_THINK_BLACK = 1;
+const double TIME_TO_THINK_WHITE = 0.6;
+const double TIME_TO_THINK_BLACK = 0.6;
 
 // Use tuned piece values from piece_values.txt
-const bool USE_TUNED_VALUES_WHITE = false;
+const bool USE_TUNED_VALUES_WHITE = true;
 const bool USE_TUNED_VALUES_BLACK = false;
 
 bool load_values(const std::string& filename, int values[9]) {
