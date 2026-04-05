@@ -1,4 +1,5 @@
 #include "../src/engine_v1.h"
+#include "../src/engine_v2.h"
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -33,8 +34,8 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 0.5;
-const double TIME_TO_THINK_BLACK = 0.5;
+const double TIME_TO_THINK_WHITE = 0.3;
+const double TIME_TO_THINK_BLACK = 0.3;
 
 // Use tuned piece values from piece_values.txt
 const bool USE_TUNED_VALUES_WHITE = false;
@@ -58,8 +59,8 @@ int main(int argc, char* argv[]) {
     Board b;
     // b.reset(); // Constructor calls reset
     
-    // EngineV1 vs EngineV1
-    EngineV1 engine_white;
+    // EngineV2 vs EngineV1
+    EngineV2 engine_white;
     EngineV1 engine_black;
     
     if (USE_TUNED_VALUES_WHITE) {

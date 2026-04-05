@@ -9,8 +9,6 @@ using namespace std::chrono;
 
 #include "eval_constants.h"
 
-// VERSION 3 Engine
-
 long long EngineV1::get_nodes_visited() const { return nodes_visited; }
 int EngineV1::get_max_depth() const { return last_depth; }
 
@@ -87,16 +85,6 @@ int EngineV1::evaluate(const Board& b) {
                                 dyn_mg -= 40; 
                                 dyn_eg -= 40;
                             }
-                        }
-                    }
-                    break;
-                case SCOUT:
-                    {
-                        int rank = pst_idx / 12;
-                        if (rank >= 7) {
-                            int penalty = (rank - 6) * 120;
-                            dyn_mg -= penalty;
-                            dyn_eg -= penalty;
                         }
                     }
                     break;
