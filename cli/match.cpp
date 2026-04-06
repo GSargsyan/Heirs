@@ -1,4 +1,6 @@
 #include "../src/engine_v1.h"
+#include "../src/engine_v2.h"
+#include "../src/eval_constants.h"
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -33,8 +35,8 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 1;
-const double TIME_TO_THINK_BLACK = 1;
+const double TIME_TO_THINK_WHITE = 0.2;
+const double TIME_TO_THINK_BLACK = 0.01;
 
 // Use tuned piece values from piece_values.txt
 const bool USE_TUNED_VALUES_WHITE = false;
@@ -59,8 +61,8 @@ int main(int argc, char* argv[]) {
     // b.reset(); // Constructor calls reset
     
     // EngineV2 vs EngineV1
-    EngineV1 engine_white;
-    EngineV1 engine_black;
+    EngineV2 engine_white;
+    EngineV2 engine_black;
     
     if (USE_TUNED_VALUES_WHITE) {
         int vals[9];
@@ -117,6 +119,14 @@ int main(int argc, char* argv[]) {
         
         b.make_move(m);
         b.print();
+        
+        int white_mat = 0;
+        int black_mat = 0;
+        for (int p = 1; p < 9; ++p) {
+            white_mat += b.piece_counts[WHITE][p] * EvalConstants::PIECE_VALUES[p];
+            black_mat += b.piece_counts[BLACK][p] * EvalConstants::PIECE_VALUES[p];
+        }
+        std::cout << "Material Diff (White - Black): " << (white_mat - black_mat) << std::endl;
         
         moves++;
     }

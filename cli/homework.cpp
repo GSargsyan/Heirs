@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <vector>
 
 // Enum definitions (same as before to maintain compatibility)
 enum Color {
@@ -99,6 +100,32 @@ public:
     bool is_draw(int required_count = 2) const; // Combines repetition and 50-moves
     uint64_t get_hash() const { return zobrist_key; }
     
+    void set_history(int hmc, const std::vector<uint64_t>& hist) {
+        half_move_clock = hmc;
+        history_count = 0;
+        for (int i = 0; i < hist.size() && i < 2048; ++i) {
+            history[history_count] = hist[i];
+            half_move_history[history_count] = 0;
+            history_count++;
+        }
+    }
+    
+    void recalculate_zobrist() {
+        init_zobrist();
+        zobrist_key = 0;
+        for (int sq = 0; sq < 256; ++sq) {
+            PieceType p = piece_at(sq);
+            if (p != NO_PIECE && p != OFFBOARD) {
+                zobrist_key ^= piece_keys[sq][color_at(sq)][p];
+            }
+        }
+        if (turn == BLACK) {
+            zobrist_key ^= side_key;
+        }
+    }
+    
+    const uint64_t* get_history_array() const { return history; }
+    
     void print() const;
     
     // Incremental Evaluation Tracking
@@ -154,12 +181,12 @@ private:
 namespace EvalConstants {
     const int DEFAULT_VAL_BABY = 100;
     const int DEFAULT_VAL_PRINCE = 20000;
-    const int DEFAULT_VAL_PRINCESS = 1100;
+    const int DEFAULT_VAL_PRINCESS = 1200;
     const int DEFAULT_VAL_PONY = 120;
-    const int DEFAULT_VAL_GUARD = 420;
-    const int DEFAULT_VAL_TUTOR = 335;
-    const int DEFAULT_VAL_SCOUT = 500;
-    const int DEFAULT_VAL_SIBLING = 300;
+    const int DEFAULT_VAL_GUARD = 400;
+    const int DEFAULT_VAL_TUTOR = 300;
+    const int DEFAULT_VAL_SCOUT = 400;
+    const int DEFAULT_VAL_SIBLING = 250;
 
     const int PIECE_VALUES[] = {
         0, DEFAULT_VAL_BABY, DEFAULT_VAL_PRINCE, DEFAULT_VAL_PRINCESS, DEFAULT_VAL_PONY, 
@@ -183,51 +210,51 @@ namespace EvalConstants {
 
     const int MAX_PHASE = 324;
 
-    // Piece-Square Tables (White perspective)
     const int PST_BABY[144] = {
          0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
-        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-        15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-        20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
-        25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
-        25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
-        10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-         5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 
+         5,  5,  5,  5,  -5,  5,  5,  -5,  5,  5,  5,  5,
+        10, 10, 10, 10,  -5, 10, 10,  -5, 10, 10, 10, 10,
+        15, 15, 15, 15,  30, 15, 15,  30, 15, 15, 15, 15,
+        20, 20, 20, 20,  20, 20, 20,  20, 20, 20, 20, 20,
+        25, 25, 25, 25,  25, 25, 25,  25, 25, 25, 25, 25,
+        15, 15, 15, 15,  15, 15, 15,  15, 15, 15, 15, 15,
+        10, 10, 10, 10,  10, 10, 10,  10, 10, 10, 10, 10,
+         5,  5,  5,  5,   5,  5,  5,   5,  5,  5,  5,  5,
+         0,  0,  0,  0,   0,  0,  0,   0,  0,  0,  0,  0,
+         0,  0,  0,  0,   0,  0,  0,   0,  0,  0,  0,  0,
+         0,  0,  0,  0,   0,  0,  0,   0,  0,  0,  0,  0 
     };
 
     const int PST_PRINCE[144] = {
-        10,   10,  10,  20,  20,  20,  20,  20,  20,  20,  10,  10,
+        10,   10,  20,  20,  20,  20,  20,  20,  20,  20,  10,  10,
          5,    5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,
         -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
-        -20, -20, -10, -10, -10, -10, -10, -10, -10, -20, -20, -20,
-        -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30,
-        -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
-        -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-        -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-        -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-        -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-        -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-        -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10
     };
 
     const int PST_SCOUT[144] = {
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   5,   5,   5,   5,   0,   0,   0,   0,
-          0,   0,   0,   0,  20,  20,  20,  20,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          -20, -20, -20, -20, -20, -20, -20, -20, -20, -20, -20, -20,
-          -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30,
-          -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
-          -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
-          -60, -60, -60, -60, -60, -60, -60, -60, -60, -60, -60, -60,
-          -70, -70, -70, -70, -70, -70, -70, -70, -70, -70, -70, -70,
-          -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0, 30, 0, 0, 30, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0
     };
+
 
     const int PST_CENTER[144] = {
         -15, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -15,
@@ -260,18 +287,18 @@ namespace EvalConstants {
     };
 
     const int PST_PRINCE_EG[144] = {
-        -10, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -10,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
-        -10, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -10
+        -25, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -25,
+        -15,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -15,
+        -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
+        -15,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -15,
+        -15,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -15,
+        -15,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -15,
+        -15,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -15,
+        -15,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -15,
+        -15,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -15,
+        -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
+        -15,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -15,
+        -25, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -25
     };
 
     const int PST_CENTER_EG[144] = {
@@ -294,14 +321,13 @@ namespace EvalConstants {
             switch (p) {
                 case BABY: return PST_BABY[pst_idx];
                 case PRINCE: return PST_PRINCE[pst_idx];
-                case SCOUT: return PST_SCOUT[pst_idx]; 
+                case SCOUT: return PST_SCOUT[pst_idx];
                 default: return PST_CENTER[pst_idx];
             }
         } else {
             switch (p) {
                 case BABY: return PST_BABY_EG[pst_idx];
                 case PRINCE: return PST_PRINCE_EG[pst_idx];
-                case SCOUT: return PST_CENTER_EG[pst_idx];
                 default: return PST_CENTER_EG[pst_idx];
             }
         }
@@ -870,6 +896,23 @@ public:
         }
         return false;
     }
+    
+    void save_to_file(std::ostream& out) const {
+        size_t sz = table.size();
+        out.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
+        out.write(reinterpret_cast<const char*>(table.data()), sz * sizeof(TTEntryV1));
+    }
+
+    void load_from_file(std::istream& in) {
+        size_t sz = 0;
+        if (in.read(reinterpret_cast<char*>(&sz), sizeof(sz))) {
+            if (sz == table.size()) {
+                in.read(reinterpret_cast<char*>(table.data()), sz * sizeof(TTEntryV1));
+            } else {
+                in.seekg(-(std::streamoff)sizeof(sz), std::ios::cur);
+            }
+        }
+    }
 
 private:
     std::vector<TTEntryV1> table;
@@ -892,6 +935,16 @@ public:
     void set_times(double my_time, double opp_time) {
         my_time_left = my_time;
         opp_time_left = opp_time;
+    }
+    
+    void save_state(std::ostream& out) const {
+        tt.save_to_file(out);
+        out.write(reinterpret_cast<const char*>(history_table), sizeof(history_table));
+    }
+    
+    void load_state(std::istream& in) {
+        tt.load_from_file(in);
+        in.read(reinterpret_cast<char*>(history_table), sizeof(history_table));
     }
     
 private:
@@ -951,6 +1004,13 @@ EngineV1::EngineV1() : nodes_visited(0), last_depth(0), tt(16) {
     for (int i = 0; i < 9; ++i) {
         piece_values[i] = EvalConstants::PIECE_VALUES[i];
     }
+    for (int c = 0; c < 2; ++c) {
+        for (int f = 0; f < 256; ++f) {
+            for (int t = 0; t < 256; ++t) {
+                history_table[c][f][t] = 0;
+            }
+        }
+    }
 }
 
 void EngineV1::set_piece_values(const int values[9]) {
@@ -967,11 +1027,20 @@ inline int to_12x12(int sq) {
 
 // Helper to flip the board index for Black (mirror vertically)
 // Assuming board is 0-143, row 0 is bottom.
-inline int mirror_sq(int sq) {
-    int r = sq / 12;
-    int c = sq % 12;
-    return (11 - r) * 12 + c;
-}
+static const int MIRROR_SQ[144] = {
+    132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143,
+    120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131,
+    108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+     96,  97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107,
+     84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,
+     72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83,
+     60,  61,  62,  63,  64,  65,  66,  67,  68,  69,  70,  71,
+     48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,
+     36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
+     24,  25,  26,  27,  28,  29,  30,  31,  32,  33,  34,  35,
+     12,  13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,
+      0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11
+};
 
 int EngineV1::evaluate(const Board& b) {
     int game_phase = b.game_phase;
@@ -1000,7 +1069,7 @@ int EngineV1::evaluate(const Board& b) {
             int sq = list[i];
             PieceType p = b.piece_at(sq);
             int pst_sq = to_12x12(sq);
-            int pst_idx = (c == WHITE) ? pst_sq : mirror_sq(pst_sq);
+            int pst_idx = (c == WHITE) ? pst_sq : MIRROR_SQ[pst_sq];
 
             switch (p) {
                 case BABY:
@@ -1241,9 +1310,11 @@ void EngineV1::score_moves(const MoveList& moves, int* move_scores, const Board&
         }
         
         // Band 0: Scout moves take absolute priority
+        /*
         if (attacker == SCOUT) {
             move_scores[i] += 5000000;
         }
+        */
     }
 }
 
@@ -1675,17 +1746,67 @@ int main() {
     if (b.side_to_move() != my_color) {
         b.make_null_move();
     }
-
+    
+    b.recalculate_zobrist();
+    
+    int hmc = 0;
+    std::vector<uint64_t> past_history;
+    
     EngineV1 engine;
     engine.set_times(my_time, opp_time);
+
+    ifstream playdata_in("playdata.txt", std::ios::binary);
+    if (playdata_in) {
+        playdata_in >> hmc;
+        int count = 0;
+        if (playdata_in >> count) {
+            for (int i = 0; i < count; ++i) {
+                uint64_t h;
+                playdata_in >> h;
+                past_history.push_back(h);
+            }
+        }
+        
+        int saved_pieces = 0;
+        if (playdata_in >> saved_pieces) {
+            int current_pieces = b.get_white_piece_count() + b.get_black_piece_count();
+            bool reset_hmc = false;
+            if (current_pieces < saved_pieces) {
+                reset_hmc = true;
+            } else {
+                int saved_baby_count = 0;
+                if (playdata_in >> saved_baby_count) {
+                    for (int i = 0; i < saved_baby_count; ++i) {
+                        int sq;
+                        playdata_in >> sq;
+                        if (b.piece_at(sq) != BABY) {
+                            reset_hmc = true;
+                        }
+                    }
+                }
+            }
+            if (reset_hmc) {
+                hmc = 0;
+            } else {
+                hmc++; // opponent made a quiet move, so it increments
+            }
+            
+            while (playdata_in.peek() == ' ' || playdata_in.peek() == '\n' || playdata_in.peek() == '\r') {
+                playdata_in.get();
+            }
+            engine.load_state(playdata_in);
+        }
+        playdata_in.close();
+    }
+    b.set_history(hmc, past_history);
     
-    // try staying ahead of time, but need at least 0.1 second to think
+    // try staying ahead of time, but need at least 0.05 second to think
 
 
     //double think_time = 0.95;
     double think_time = my_time - opp_time - 0.1;
-    if (think_time < 0.1) {
-        think_time = 0.1;
+    if (think_time < 0.05) {
+        think_time = 0.05;
     }
     if (think_time > 0.95) {
         think_time = 0.95;
@@ -1706,6 +1827,32 @@ int main() {
     ofstream out("output.txt");
     out << move_to_string_hw(m) << "\n";
     out.close();
+    
+    if (m.from != 0 || m.to != 0) {
+        b.make_move(m);
+    } else {
+        b.make_null_move();
+    }
+    
+    ofstream playdata_out("playdata.txt", std::ios::binary);
+    playdata_out << b.get_half_move_clock() << "\n";
+    playdata_out << b.get_history_count() + 1 << "\n";
+    const uint64_t* hist = b.get_history_array();
+    for (int i = 0; i < b.get_history_count(); ++i) {
+        playdata_out << hist[i] << " ";
+    }
+    playdata_out << b.get_hash() << "\n";
+    
+    playdata_out << b.get_white_piece_count() + b.get_black_piece_count() << "\n";
+    int baby_c = b.piece_counts[WHITE][BABY] + b.piece_counts[BLACK][BABY];
+    playdata_out << baby_c << "\n";
+    for(int sq=0; sq<256; ++sq) {
+        if(b.piece_at(sq) == BABY) playdata_out << sq << " ";
+    }
+    playdata_out << "\n";
+    
+    engine.save_state(playdata_out);
+    playdata_out.close();
 
     return 0;
 }
