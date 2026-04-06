@@ -154,11 +154,11 @@ private:
 namespace EvalConstants {
     const int DEFAULT_VAL_BABY = 100;
     const int DEFAULT_VAL_PRINCE = 20000;
-    const int DEFAULT_VAL_PRINCESS = 1000;
-    const int DEFAULT_VAL_PONY = 100;
+    const int DEFAULT_VAL_PRINCESS = 1100;
+    const int DEFAULT_VAL_PONY = 120;
     const int DEFAULT_VAL_GUARD = 420;
     const int DEFAULT_VAL_TUTOR = 335;
-    const int DEFAULT_VAL_SCOUT = 700;
+    const int DEFAULT_VAL_SCOUT = 500;
     const int DEFAULT_VAL_SIBLING = 300;
 
     const int PIECE_VALUES[] = {
@@ -217,76 +217,76 @@ namespace EvalConstants {
     const int PST_SCOUT[144] = {
           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   0,
-          0,   10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  0,
-          0,   10,  10,  10,  10,  10,  10,  10,  10,  10,  10,   0,
-          0,   10,  10,  10,  10,  10,  10,  10,  10,  10,  10,   0,
+          0,   0,   0,   0,   5,   5,   5,   5,   0,   0,   0,   0,
+          0,   0,   0,   0,  20,  20,  20,  20,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+          -20, -20, -20, -20, -20, -20, -20, -20, -20, -20, -20, -20,
+          -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30, -30,
+          -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
+          -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50, -50,
+          -60, -60, -60, -60, -60, -60, -60, -60, -60, -60, -60, -60,
+          -70, -70, -70, -70, -70, -70, -70, -70, -70, -70, -70, -70,
+          -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80,
     };
 
     const int PST_CENTER[144] = {
-        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+        -15, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -15,
         -10,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -10,
         -10,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -10,
         -10,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -10,
         -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
-        -10,   0,   5,  10,  20,  30,  30,  20,  10,   5,   0, -10,
-        -10,   0,   5,  10,  20,  30,  30,  20,  10,   5,   0, -10,
+        -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
+        -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
         -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
         -10,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -10,
         -10,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -10,
         -10,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -10,
-        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10
+        -15, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -15
     };
 
     const int PST_BABY_EG[144] = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
+        -5,   -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5, 
+        -5,   -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5, 
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
+        0,     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0
     };
 
     const int PST_PRINCE_EG[144] = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        -10, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -10,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5,
+        -10, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -10
     };
 
     const int PST_CENTER_EG[144] = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        -10, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -10, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -5,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -5, 
+        -10, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -10
     };
 
     inline int get_pst_value(PieceType p, int pst_idx, bool is_eg) {
@@ -294,7 +294,7 @@ namespace EvalConstants {
             switch (p) {
                 case BABY: return PST_BABY[pst_idx];
                 case PRINCE: return PST_PRINCE[pst_idx];
-                case SCOUT: return PST_CENTER[pst_idx]; 
+                case SCOUT: return PST_SCOUT[pst_idx]; 
                 default: return PST_CENTER[pst_idx];
             }
         } else {
@@ -1023,6 +1023,22 @@ int EngineV1::evaluate(const Board& b) {
                         }
                     }
                     break;
+                case SCOUT:
+                    {
+                        int rank = pst_idx / 12;
+                        int scout_val = piece_values[SCOUT];
+                        int penalty = 0;
+                        if (rank == 11) penalty = scout_val;
+                        else if (rank == 10) penalty = (scout_val * 90) / 100;
+                        else if (rank == 9) penalty = (scout_val * 75) / 100;
+                        else if (rank == 8) penalty = (scout_val * 50) / 100;
+                        else if (rank == 7) penalty = (scout_val * 25) / 100;
+                        else if (rank == 6 || rank == 5) penalty = (scout_val * 10) / 100;
+
+                        dyn_mg -= penalty;
+                        dyn_eg -= penalty;
+                    }
+                    break;
                 default:
                     break; 
             }
@@ -1104,6 +1120,28 @@ int EngineV1::evaluate(const Board& b) {
             mg_score += b_undeveloped * 30; // penalize black
         }
     }
+    // --- SPECIFIC OPENING BONUSES ---
+    int opening_bonus_w = 0;
+    if (b.piece_at(52) == BABY && b.color_at(52) == WHITE) opening_bonus_w += 30;
+    if (b.piece_at(36) == SCOUT && b.color_at(36) == WHITE) opening_bonus_w += 30;
+    if (b.piece_at(55) == BABY && b.color_at(55) == WHITE) opening_bonus_w += 30;
+    if (b.piece_at(39) == SCOUT && b.color_at(39) == WHITE) opening_bonus_w += 30;
+    
+    if (b.piece_at(52) == BABY && b.color_at(52) == WHITE && b.piece_at(36) == SCOUT && b.color_at(36) == WHITE) opening_bonus_w += 20;
+    if (b.piece_at(55) == BABY && b.color_at(55) == WHITE && b.piece_at(39) == SCOUT && b.color_at(39) == WHITE) opening_bonus_w += 20;
+    
+    mg_score += opening_bonus_w;
+
+    int opening_bonus_b = 0;
+    if (b.piece_at(132) == BABY && b.color_at(132) == BLACK) opening_bonus_b += 30;
+    if (b.piece_at(148) == SCOUT && b.color_at(148) == BLACK) opening_bonus_b += 30;
+    if (b.piece_at(135) == BABY && b.color_at(135) == BLACK) opening_bonus_b += 30;
+    if (b.piece_at(151) == SCOUT && b.color_at(151) == BLACK) opening_bonus_b += 30;
+
+    if (b.piece_at(132) == BABY && b.color_at(132) == BLACK && b.piece_at(148) == SCOUT && b.color_at(148) == BLACK) opening_bonus_b += 20;
+    if (b.piece_at(135) == BABY && b.color_at(135) == BLACK && b.piece_at(151) == SCOUT && b.color_at(151) == BLACK) opening_bonus_b += 20;
+
+    mg_score -= opening_bonus_b;
 
     // --- MOP-UP EVALUATION (Force Checkmate) ---
     int winning_threshold = 400;
@@ -1220,9 +1258,11 @@ int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta, int ply) {
     // a cyclic path is a draw (score 0), whereas the same position reached 
     // from a standard path might be evaluated and stored in the TT as winning (+x).
     if (ply > 0 && b.is_draw(1)) {
-        if (my_time_left > opp_time_left + 2.0) return 20000 - ply; // Draw is win on time
-        if (opp_time_left > my_time_left + 2.0) return -20000 + ply; // Draw is loss on time
-        return 0; // Returning 0 on 1-fold repetition strictly avoids cycles
+        if (my_time_left - time_limit_sec > opp_time_left) {
+            return 20000 - ply; // Draw is win on time
+        } else {
+            return -20000 + ply; // Draw is loss on time
+        }
     }
 
     int original_alpha = alpha;
@@ -1387,9 +1427,11 @@ int EngineV1::quiescence(Board& b, int alpha, int beta, int ply) {
     }
 
     if (b.is_draw(1)) {
-        if (my_time_left > opp_time_left + 2.0) return 20000 - ply; // Draw is win on time
-        if (opp_time_left > my_time_left + 2.0) return -20000 + ply; // Draw is loss on time
-        return 0; // 1-fold repetition strictly avoids cycles inside search
+        if (my_time_left - time_limit_sec > opp_time_left) {
+            return 20000 - ply; // Draw is win on time
+        } else {
+            return -20000 + ply; // Draw is loss on time
+        }
     }
 
     int stand_pat = evaluate(b);
@@ -1637,10 +1679,20 @@ int main() {
     EngineV1 engine;
     engine.set_times(my_time, opp_time);
     
-    double think_time = 0.95;
-    // if 50 seconds remaining, think for 0.1 second
-    if (my_time < 50) {
+    // try staying ahead of time, but need at least 0.1 second to think
+
+
+    //double think_time = 0.95;
+    double think_time = my_time - opp_time - 0.1;
+    if (think_time < 0.1) {
         think_time = 0.1;
+    }
+    if (think_time > 0.95) {
+        think_time = 0.95;
+    }
+
+    if (my_time < 10) {
+        think_time = 0.01;
     }
 
     Move m = engine.search(b, think_time);

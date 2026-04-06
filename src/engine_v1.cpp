@@ -88,6 +88,22 @@ int EngineV1::evaluate(const Board& b) {
                         }
                     }
                     break;
+                case SCOUT:
+                    {
+                        int rank = pst_idx / 12;
+                        int scout_val = piece_values[SCOUT];
+                        int penalty = 0;
+                        if (rank == 11) penalty = scout_val;
+                        else if (rank == 10) penalty = (scout_val * 90) / 100;
+                        else if (rank == 9) penalty = (scout_val * 75) / 100;
+                        else if (rank == 8) penalty = (scout_val * 50) / 100;
+                        else if (rank == 7) penalty = (scout_val * 25) / 100;
+                        else if (rank == 6 || rank == 5) penalty = (scout_val * 10) / 100;
+
+                        dyn_mg -= penalty;
+                        dyn_eg -= penalty;
+                    }
+                    break;
                 default:
                     break; 
             }
@@ -168,6 +184,29 @@ int EngineV1::evaluate(const Board& b) {
             if (b.piece_at(186) == PONY) b_undeveloped++;
             mg_score += b_undeveloped * 30; // penalize black
         }
+        
+        // --- SPECIFIC OPENING BONUSES ---
+        int opening_bonus_w = 0;
+        if (b.piece_at(52) == BABY && b.color_at(52) == WHITE) opening_bonus_w += 30;
+        if (b.piece_at(36) == SCOUT && b.color_at(36) == WHITE) opening_bonus_w += 30;
+        if (b.piece_at(55) == BABY && b.color_at(55) == WHITE) opening_bonus_w += 30;
+        if (b.piece_at(39) == SCOUT && b.color_at(39) == WHITE) opening_bonus_w += 30;
+        
+        if (b.piece_at(52) == BABY && b.color_at(52) == WHITE && b.piece_at(36) == SCOUT && b.color_at(36) == WHITE) opening_bonus_w += 20;
+        if (b.piece_at(55) == BABY && b.color_at(55) == WHITE && b.piece_at(39) == SCOUT && b.color_at(39) == WHITE) opening_bonus_w += 20;
+        
+        mg_score += opening_bonus_w;
+
+        int opening_bonus_b = 0;
+        if (b.piece_at(132) == BABY && b.color_at(132) == BLACK) opening_bonus_b += 30;
+        if (b.piece_at(148) == SCOUT && b.color_at(148) == BLACK) opening_bonus_b += 30;
+        if (b.piece_at(135) == BABY && b.color_at(135) == BLACK) opening_bonus_b += 30;
+        if (b.piece_at(151) == SCOUT && b.color_at(151) == BLACK) opening_bonus_b += 30;
+
+        if (b.piece_at(132) == BABY && b.color_at(132) == BLACK && b.piece_at(148) == SCOUT && b.color_at(148) == BLACK) opening_bonus_b += 20;
+        if (b.piece_at(135) == BABY && b.color_at(135) == BLACK && b.piece_at(151) == SCOUT && b.color_at(151) == BLACK) opening_bonus_b += 20;
+
+        mg_score -= opening_bonus_b;
     }
 
     // --- MOP-UP EVALUATION (Force Checkmate) ---
