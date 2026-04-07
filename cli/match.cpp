@@ -35,8 +35,8 @@ std::string move_to_string(const Move& m) {
 }
 
 // Time limits in seconds
-const double TIME_TO_THINK_WHITE = 0.2;
-const double TIME_TO_THINK_BLACK = 0.01;
+const double TIME_TO_THINK_WHITE = 3;
+const double TIME_TO_THINK_BLACK = 0.95;
 
 // Use tuned piece values from piece_values.txt
 const bool USE_TUNED_VALUES_WHITE = false;

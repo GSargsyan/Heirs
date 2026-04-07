@@ -186,6 +186,7 @@ int EngineV1::evaluate(const Board& b) {
         }
         
         // --- SPECIFIC OPENING BONUSES ---
+        /*
         int opening_bonus_w = 0;
         if (b.piece_at(52) == BABY && b.color_at(52) == WHITE) opening_bonus_w += 30;
         if (b.piece_at(36) == SCOUT && b.color_at(36) == WHITE) opening_bonus_w += 30;
@@ -207,6 +208,7 @@ int EngineV1::evaluate(const Board& b) {
         if (b.piece_at(135) == BABY && b.color_at(135) == BLACK && b.piece_at(151) == SCOUT && b.color_at(151) == BLACK) opening_bonus_b += 20;
 
         mg_score -= opening_bonus_b;
+        */
     }
 
     // --- MOP-UP EVALUATION (Force Checkmate) ---
@@ -304,11 +306,6 @@ void EngineV1::score_moves(const MoveList& moves, int* move_scores, const Board&
                 if (hist > 690000) hist = 690000; // Cap safely
                 move_scores[i] = hist;
             }
-        }
-        
-        // Band 0: Scout moves take absolute priority
-        if (attacker == SCOUT) {
-            move_scores[i] += 5000000;
         }
     }
 }

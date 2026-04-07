@@ -85,8 +85,7 @@ public:
     // Game state
     Color side_to_move() const { return turn; }
     bool is_game_over() const;
-    int get_half_move_clock() const { return half_move_clock; }
-    int get_history_count() const { return history_count; }
+
     
     // Piece lists access for fast evaluation
     const int* get_white_pieces() const { return whitePieces; }
@@ -94,21 +93,7 @@ public:
     const int* get_black_pieces() const { return blackPieces; }
     int get_black_piece_count() const { return blackPieceCount; }
     
-    // Draw detection
-    bool is_repetition(int required_count = 2) const;
-    bool is_fifty_moves() const;
-    bool is_draw(int required_count = 2) const; // Combines repetition and 50-moves
     uint64_t get_hash() const { return zobrist_key; }
-    
-    void set_history(int hmc, const std::vector<uint64_t>& hist) {
-        half_move_clock = hmc;
-        history_count = 0;
-        for (int i = 0; i < hist.size() && i < 2048; ++i) {
-            history[history_count] = hist[i];
-            half_move_history[history_count] = 0;
-            history_count++;
-        }
-    }
     
     void recalculate_zobrist() {
         init_zobrist();
@@ -124,7 +109,7 @@ public:
         }
     }
     
-    const uint64_t* get_history_array() const { return history; }
+
     
     void print() const;
     
@@ -181,12 +166,12 @@ private:
 namespace EvalConstants {
     const int DEFAULT_VAL_BABY = 100;
     const int DEFAULT_VAL_PRINCE = 20000;
-    const int DEFAULT_VAL_PRINCESS = 1200;
-    const int DEFAULT_VAL_PONY = 120;
-    const int DEFAULT_VAL_GUARD = 400;
-    const int DEFAULT_VAL_TUTOR = 300;
-    const int DEFAULT_VAL_SCOUT = 400;
-    const int DEFAULT_VAL_SIBLING = 250;
+    const int DEFAULT_VAL_PRINCESS = 1800;
+    const int DEFAULT_VAL_PONY = 200;
+    const int DEFAULT_VAL_GUARD = 700;
+    const int DEFAULT_VAL_TUTOR = 450;
+    const int DEFAULT_VAL_SCOUT = 850;
+    const int DEFAULT_VAL_SIBLING = 350;
 
     const int PIECE_VALUES[] = {
         0, DEFAULT_VAL_BABY, DEFAULT_VAL_PRINCE, DEFAULT_VAL_PRINCESS, DEFAULT_VAL_PONY, 
@@ -243,7 +228,7 @@ namespace EvalConstants {
     const int PST_SCOUT[144] = {
         0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
         0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
-        0, 0, 0, 0, 30, 0, 0, 30, 0, 0, 0, 0,
+        0, 0, 0, 0, 50, 0, 0, 50, 0, 0, 0, 0,
         0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
         0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
         0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
@@ -255,20 +240,34 @@ namespace EvalConstants {
         0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0
     };
 
+    const int PST_SCOUT_EG[144] = {
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0, 50, 0, 0, 50, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0,
+        0, 0, 0, 0,  0, 0, 0,  0, 0, 0, 0, 0
+    };
 
     const int PST_CENTER[144] = {
-        -15, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -15,
-        -10,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -10,
-        -10,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -10,
-        -10,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -10,
-        -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
-        -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
-        -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
-        -10,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -10,
-        -10,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -10,
-        -10,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -10,
-        -10,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -10,
-        -15, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -15
+        -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15,
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
+         -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,
+          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+          5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,
+         10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,  10,
+         15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,  15,
+         20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,  20,
+         25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,  25,
+         30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,
+         30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,
+         30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,  30,
     };
 
     const int PST_BABY_EG[144] = {
@@ -290,12 +289,12 @@ namespace EvalConstants {
         -25, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -25,
         -15,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -15,
         -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
-        -15,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -15,
-        -15,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -15,
-        -15,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -15,
-        -15,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -15,
-        -15,   0,   5,  10,  20,  20,  20,  20,  10,   5,   0, -15,
-        -15,   0,   5,  10,  10,  10,  10,  10,  10,   5,   0, -15,
+        -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
+        -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
+        -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
+        -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
+        -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
+        -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
         -15,   0,   5,   5,   5,   5,   5,   5,   5,   5,   0, -15,
         -15,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, -15,
         -25, -15, -15, -15, -15, -15, -15, -15, -15, -15, -15, -25
@@ -328,6 +327,7 @@ namespace EvalConstants {
             switch (p) {
                 case BABY: return PST_BABY_EG[pst_idx];
                 case PRINCE: return PST_PRINCE_EG[pst_idx];
+                case SCOUT: return PST_SCOUT_EG[pst_idx];
                 default: return PST_CENTER_EG[pst_idx];
             }
         }
@@ -813,28 +813,7 @@ bool Board::is_game_over() const {
     return false;
 }
 
-bool Board::is_repetition(int required_count) const {
-    int limit = half_move_clock;
-    if (limit > history_count) limit = history_count;
-    int count = 0;
-    for (int i = 1; i <= limit; ++i) {
-        if (history[history_count - i] == zobrist_key) {
-            count++;
-            if (count >= required_count) return true; 
-        }
-    }
-    return false;
-}
 
-bool Board::is_fifty_moves() const {
-    return half_move_clock >= 100;
-}
-
-bool Board::is_draw(int required_count) const {
-    if (is_fifty_moves()) return true;
-    if (is_repetition(required_count)) return true;
-    return false;
-}
 
 // --- FILE: engine_v1.h ---
 #ifndef ENGINE_V1_H
@@ -897,22 +876,7 @@ public:
         return false;
     }
     
-    void save_to_file(std::ostream& out) const {
-        size_t sz = table.size();
-        out.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
-        out.write(reinterpret_cast<const char*>(table.data()), sz * sizeof(TTEntryV1));
-    }
 
-    void load_from_file(std::istream& in) {
-        size_t sz = 0;
-        if (in.read(reinterpret_cast<char*>(&sz), sizeof(sz))) {
-            if (sz == table.size()) {
-                in.read(reinterpret_cast<char*>(table.data()), sz * sizeof(TTEntryV1));
-            } else {
-                in.seekg(-(std::streamoff)sizeof(sz), std::ios::cur);
-            }
-        }
-    }
 
 private:
     std::vector<TTEntryV1> table;
@@ -931,21 +895,7 @@ public:
     // Set custom piece values
     void set_piece_values(const int values[9]);
     
-    // Pass time constraints to adapt draw behavior
-    void set_times(double my_time, double opp_time) {
-        my_time_left = my_time;
-        opp_time_left = opp_time;
-    }
-    
-    void save_state(std::ostream& out) const {
-        tt.save_to_file(out);
-        out.write(reinterpret_cast<const char*>(history_table), sizeof(history_table));
-    }
-    
-    void load_state(std::istream& in) {
-        tt.load_from_file(in);
-        in.read(reinterpret_cast<char*>(history_table), sizeof(history_table));
-    }
+
     
 private:
     int piece_values[9];
@@ -979,8 +929,7 @@ private:
     long long nodes_visited;
     int last_depth;
     
-    double my_time_left = 0.0;
-    double opp_time_left = 0.0;
+
 };
 
 #endif // ENGINE_V1_H
@@ -1166,7 +1115,7 @@ int EngineV1::evaluate(const Board& b) {
     eg_score -= b_prince_moves * 10;
 
     // --- EARLY GAME DEVELOPMENT PENALTY ---
-    if (game_phase > 200) {
+    if (game_phase > 230) {
         if (b.piece_at(5) != PRINCESS) {
             int w_undeveloped = 0;
             if (b.piece_at(1) == PONY) w_undeveloped++;
@@ -1189,29 +1138,6 @@ int EngineV1::evaluate(const Board& b) {
             mg_score += b_undeveloped * 30; // penalize black
         }
     }
-    // --- SPECIFIC OPENING BONUSES ---
-    int opening_bonus_w = 0;
-    if (b.piece_at(52) == BABY && b.color_at(52) == WHITE) opening_bonus_w += 30;
-    if (b.piece_at(36) == SCOUT && b.color_at(36) == WHITE) opening_bonus_w += 30;
-    if (b.piece_at(55) == BABY && b.color_at(55) == WHITE) opening_bonus_w += 30;
-    if (b.piece_at(39) == SCOUT && b.color_at(39) == WHITE) opening_bonus_w += 30;
-    
-    if (b.piece_at(52) == BABY && b.color_at(52) == WHITE && b.piece_at(36) == SCOUT && b.color_at(36) == WHITE) opening_bonus_w += 20;
-    if (b.piece_at(55) == BABY && b.color_at(55) == WHITE && b.piece_at(39) == SCOUT && b.color_at(39) == WHITE) opening_bonus_w += 20;
-    
-    mg_score += opening_bonus_w;
-
-    int opening_bonus_b = 0;
-    if (b.piece_at(132) == BABY && b.color_at(132) == BLACK) opening_bonus_b += 30;
-    if (b.piece_at(148) == SCOUT && b.color_at(148) == BLACK) opening_bonus_b += 30;
-    if (b.piece_at(135) == BABY && b.color_at(135) == BLACK) opening_bonus_b += 30;
-    if (b.piece_at(151) == SCOUT && b.color_at(151) == BLACK) opening_bonus_b += 30;
-
-    if (b.piece_at(132) == BABY && b.color_at(132) == BLACK && b.piece_at(148) == SCOUT && b.color_at(148) == BLACK) opening_bonus_b += 20;
-    if (b.piece_at(135) == BABY && b.color_at(135) == BLACK && b.piece_at(151) == SCOUT && b.color_at(151) == BLACK) opening_bonus_b += 20;
-
-    mg_score -= opening_bonus_b;
-
     // --- MOP-UP EVALUATION (Force Checkmate) ---
     int winning_threshold = 400;
 
@@ -1324,17 +1250,7 @@ void EngineV1::score_moves(const MoveList& moves, int* move_scores, const Board&
 int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta, int ply) {
     nodes_visited++;
     
-    // Check for draw by repetition or 50-move rule
-    // We must check this BEFORE the TT probe, because a position reached by 
-    // a cyclic path is a draw (score 0), whereas the same position reached 
-    // from a standard path might be evaluated and stored in the TT as winning (+x).
-    if (ply > 0 && b.is_draw(1)) {
-        if (my_time_left - time_limit_sec > opp_time_left) {
-            return 20000 - ply; // Draw is win on time
-        } else {
-            return -20000 + ply; // Draw is loss on time
-        }
-    }
+
 
     int original_alpha = alpha;
     TTEntryV1 tt_entry;
@@ -1402,7 +1318,7 @@ int EngineV1::alphabeta(Board& b, int depth, int alpha, int beta, int ply) {
     // Futility Pruning Setup
     bool futil_prune = false;
     int futil_stand_pat = -2000000;
-    if (depth == 1 && !b.is_game_over() && !b.is_draw()) {
+    if (depth == 1 && !b.is_game_over()) {
         futil_stand_pat = evaluate(b);
         int margin = piece_values[GUARD];
         if (futil_stand_pat + margin < alpha) {
@@ -1497,13 +1413,7 @@ int EngineV1::quiescence(Board& b, int alpha, int beta, int ply) {
         if (is_time_up()) throw std::runtime_error("Time limit exceeded");
     }
 
-    if (b.is_draw(1)) {
-        if (my_time_left - time_limit_sec > opp_time_left) {
-            return 20000 - ply; // Draw is win on time
-        } else {
-            return -20000 + ply; // Draw is loss on time
-        }
-    }
+
 
     int stand_pat = evaluate(b);
 
@@ -1749,110 +1659,69 @@ int main() {
     
     b.recalculate_zobrist();
     
-    int hmc = 0;
-    std::vector<uint64_t> past_history;
-    
     EngineV1 engine;
-    engine.set_times(my_time, opp_time);
-
-    ifstream playdata_in("playdata.txt", std::ios::binary);
-    if (playdata_in) {
-        playdata_in >> hmc;
-        int count = 0;
-        if (playdata_in >> count) {
-            for (int i = 0; i < count; ++i) {
-                uint64_t h;
-                playdata_in >> h;
-                past_history.push_back(h);
-            }
-        }
-        
-        int saved_pieces = 0;
-        if (playdata_in >> saved_pieces) {
-            int current_pieces = b.get_white_piece_count() + b.get_black_piece_count();
-            bool reset_hmc = false;
-            if (current_pieces < saved_pieces) {
-                reset_hmc = true;
-            } else {
-                int saved_baby_count = 0;
-                if (playdata_in >> saved_baby_count) {
-                    for (int i = 0; i < saved_baby_count; ++i) {
-                        int sq;
-                        playdata_in >> sq;
-                        if (b.piece_at(sq) != BABY) {
-                            reset_hmc = true;
-                        }
-                    }
-                }
-            }
-            if (reset_hmc) {
-                hmc = 0;
-            } else {
-                hmc++; // opponent made a quiet move, so it increments
-            }
-            
-            while (playdata_in.peek() == ' ' || playdata_in.peek() == '\n' || playdata_in.peek() == '\r') {
-                playdata_in.get();
-            }
-            engine.load_state(playdata_in);
-        }
-        playdata_in.close();
-    }
-    b.set_history(hmc, past_history);
     
-    // try staying ahead of time, but need at least 0.05 second to think
-
-
-    //double think_time = 0.95;
-    double think_time = my_time - opp_time - 0.1;
-    if (think_time < 0.05) {
-        think_time = 0.05;
-    }
-    if (think_time > 0.95) {
-        think_time = 0.95;
-    }
-
-    if (my_time < 10) {
+    // Stay ahead in time; minimum 0.001s to avoid fully random moves
+    double think_time;
+    if (my_time < 10.0) {
         think_time = 0.01;
+    } else {
+        think_time = my_time - opp_time - 0.1;
+        if (think_time < 0.001) {
+            think_time = 0.001;
+        }
+        if (think_time > 3) {
+            think_time = 3;
+        }
     }
 
-    Move m = engine.search(b, think_time);
+    // Hardcoded opening book: baby h-file forward 2, then scout tucks behind
+    // Square indices: col h=7, col j=8; sq = row*16 + col (0-based rows)
+    // White: h2(23)->h4(55), j1(8)->h3(39)
+    // Black: h11(167)->h9(135), j12(184)->h10(151)
+    Move m;
+    bool opening_played = false;
 
-    if (m.from == 0 && m.to == 0) {
-        MoveList ml;
-        b.generate_moves(ml);
-        if (ml.count > 0) m = ml.moves[0];
+    if (my_color == WHITE) {
+        if (!opening_played &&
+            b.piece_at(23) == BABY && b.color_at(23) == WHITE &&
+            b.piece_at(55) == NO_PIECE) {
+            m = Move(23, 55, NO_PIECE);
+            opening_played = true;
+        }
+        if (!opening_played &&
+            b.piece_at(8) == SCOUT && b.color_at(8) == WHITE &&
+            b.piece_at(39) == NO_PIECE) {
+            m = Move(8, 39, NO_PIECE);
+            opening_played = true;
+        }
+    } else {
+        if (!opening_played &&
+            b.piece_at(167) == BABY && b.color_at(167) == BLACK &&
+            b.piece_at(135) == NO_PIECE) {
+            m = Move(167, 135, NO_PIECE);
+            opening_played = true;
+        }
+        if (!opening_played &&
+            b.piece_at(184) == SCOUT && b.color_at(184) == BLACK &&
+            b.piece_at(151) == NO_PIECE) {
+            m = Move(184, 151, NO_PIECE);
+            opening_played = true;
+        }
+    }
+
+    if (!opening_played) {
+        m = engine.search(b, think_time);
+        if (m.from == 0 && m.to == 0) {
+            MoveList ml;
+            b.generate_moves(ml);
+            if (ml.count > 0) m = ml.moves[0];
+        }
     }
 
     ofstream out("output.txt");
     out << move_to_string_hw(m) << "\n";
     out.close();
-    
-    if (m.from != 0 || m.to != 0) {
-        b.make_move(m);
-    } else {
-        b.make_null_move();
-    }
-    
-    ofstream playdata_out("playdata.txt", std::ios::binary);
-    playdata_out << b.get_half_move_clock() << "\n";
-    playdata_out << b.get_history_count() + 1 << "\n";
-    const uint64_t* hist = b.get_history_array();
-    for (int i = 0; i < b.get_history_count(); ++i) {
-        playdata_out << hist[i] << " ";
-    }
-    playdata_out << b.get_hash() << "\n";
-    
-    playdata_out << b.get_white_piece_count() + b.get_black_piece_count() << "\n";
-    int baby_c = b.piece_counts[WHITE][BABY] + b.piece_counts[BLACK][BABY];
-    playdata_out << baby_c << "\n";
-    for(int sq=0; sq<256; ++sq) {
-        if(b.piece_at(sq) == BABY) playdata_out << sq << " ";
-    }
-    playdata_out << "\n";
-    
-    engine.save_state(playdata_out);
-    playdata_out.close();
 
     return 0;
 }

@@ -171,7 +171,7 @@ int EngineV2::evaluate(const Board& b) {
     eg_score -= b_prince_moves * 10;
 
     // --- EARLY GAME DEVELOPMENT PENALTY ---
-    if (game_phase > 200) {
+    if (game_phase > 250) {
         if (b.piece_at(5) != PRINCESS) {
             int w_undeveloped = 0;
             if (b.piece_at(1) == PONY) w_undeveloped++;
