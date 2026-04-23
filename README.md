@@ -1,4 +1,6 @@
-# Project Description
+### 🏆 The project was the 1st place winner of the Spring 2026 USC AI Tournament
+
+# Heirs - Project Description
 
 In the realm of inheritance, power is fragile.
 The old rulers are gone. What remains are heirs, siblings, tutors, and guards — all too young to
